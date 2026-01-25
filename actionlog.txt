@@ -1,0 +1,711 @@
+SPEAKER 0
+so big. Yeah I But not Yeah I Yeah, I was like. you're. I think. The first question to be what it was just that you get a different if you get a sequential and then the second one is. The third one I, I think I follow you. I. That you know, the rest of the papers section section one, I think that section. yeah that's good, yeah, because like you know the two of them the other job. uh Oh, that's a bad thing for you. Yes. Yeah, that was, that was, that was uh. What is? What does that mean. I never. You. I No I Yeah It's Christmas and the Christmas. Yeah. Hi, um. Oh. Can you not just describe that for more. I, I'm not. Yeah, I'm.
+
+SPEAKER 1
+OK. Last lecture, week 11. Thanks for making it really last lecture except maybe some optional course for the term, so it will be good. Uh, I don't intend to keep you here today for the full hour also because I cannot lecture on your content by rules. So I will tell you a little bit about things I didn't finish up, uh, last time, which I will not assess. And I'll talk a little bit about how to prepare about for the exam, what to revise, what not to revise. Then, you know, if necessary, I'll talk a little bit about the exam in and of itself. I expect this to last max an hour. Then who won't leave, who wants to ask questions around 3:30? I have to go because I have a meeting, but it should be fine. We'll talk about when I do the last office hour when we talk about revision. OK. Last two things about the repeated games that I wanted to mention, you know, we have seen this very good result that tell us that, that told us, look, beyond uh not being able to punish me. Below the mean max because one option that I have is to defend my best response. Any payoff you like, you can get if the game is repeated because, you know, we can always use mean max to punish and so, you know, if we both get better, we are willing to sacrifice um not deviating today, which would give us a gain for a small amount of time versus the cost of being punished forever. So that was a good result, that was a positive result. I told you many things can happen, but all the things are good. And now, I want to question this with two things. The first one is Finite Horizon games. And the other one is private monitoring. So, let me first talk about finite horizon and say that everything changes with finite horizon and let me present this theorem which is quite strong. Think that instead of the game going on forever, it lasts the periods. And think that the stage game you're playing has a unique Nash equilibrium. So there is just like in the Prisoner dilemma, we were thinking about, there was a unique equilibrium that was for us to both defect or to both sh. Now, what happens in the finitely repeated version of that game? I solve it by backward induction. Take any terminal history, so any period that is final, no matter what has happened before, that's the last period we are playing a static game. So what do I do? I play my static Nash equilibrium. That's the only option. Now, so that I saw. Now let's move one period back. Now, I know that tomorrow, no matter what, what I do today, I will be myopic and play my static best also. What is it that I do today? Well, tomorrow I will get the same pay of no matter what I do. So the game is again static. I compare my incentives today to my incentives today because there is no way to punish me tomorrow. Tomorrow we'll play this equilibrium no matter what. So in the last second to last period, I play Nash, but that static Nash, but that's true for any period. The idea is that I cannot punish you because in the next period, I will be playing static Nash. So in the current period, because in the future, I will have no way to punish you, it's as if the game was static and I play static Nash. So If the stage game has a uniqueness equilibrium, then in any subgame perfect equilibrium of the finitely repeated game, you play that strategy no matter what the other players have done. So, here you see that reputations are useless because in a sense, we cannot build them through punishment. We could resurrect things, however, if we had multiple equilibrium in the final stage. If we had multiple equilibrium in the finite state, in the final stage, and say people didn't think that this equilibrium will payoff equivalent, they had one that they liked better, one that they liked least, and one that was in between, I could say in the last period, let's play the Nash equilibrium that is in between, OK? On equilibrium, if you did what we were expecting to do. But if in the 2nd to last period, you took advantage of me, tomorrow we'll play the Nash equilibrium that you like the least. So I will punish you how? By through equilibrium selection. I will punish you tomorrow by choosing the words equilibrium. So today, I will be willing to do something that is not in my static best interest because I know that if I don't do it tomorrow, the equilibrium will switch from the mixed one, which is in between, to the one that is worse for me. So when you have multiple Nash equilibria, you can build a reputation and have subgame perfect equilibrium in which you don't play static Nash at some history. But if you have only one equilibrium, you can't because exactly in the last period, this is premised on punishing you by switching across equilibrium. OK. So, this you can remember. Here you have an example of a two-player repeated game. Two repeated game where you don't need to play static mesh in both periods. Let's think about this game. Let's look at the best responses static. Well, if I do my, if my opponent plays A, I want to do B, and if my opponent does B, I want to do A. So we have two pure equilibrium. Which gives pay of 61 and 16. I think equilibrium always all, so there will be a mixed strategy, equilibrium. And I think to myself, if player two does half of the time A and B, then by choosing A, I get half of the time 5.5 of the time 1, that's a 3, and by choosing B, I get half of the time 6.5 of the time 0, that's a 3, so I'm indiffer. So there is a mixed equilibrium in which we both get payoff 3 and in which we mix between A and B with equal probability. So let's build that one of these subgame perfect equilibrium where we don't play Nash in the first period. And what could be that? We could say, think about an equilibrium where we play AA in the first period, and if everyone plays AA tomorrow, we play the mixed equilibrium. What's our payoff from that? Today I get a 5. Tomorrow, I multiply by delta, I get a 3. OK. What happens if I deviate? If I deviate and we are playing 55, today I can get a 6 because I go to A, B, and tomorrow I will get a 1, so I can get 6 plus delta. So, as long as 5 + 3 delta is bigger than 6 plus delta, which means delta is bigger than 1/2. I, this is a subject I really. OK. So, basically, I'm punishing through the words equilibrium. If you take advantage in the first period and don't play off equilibrium of static equilibrium, meaning AA and you do static equilibrium, tomorrow we'll go to the worst one. So, 6 plus delta is smaller than 5 + 3 delta. OK. Example, Pat. So with multiple equilibria, you can get subgame perfect equilibrium where in some history, you don't play Nash, static Nash, it's understood. Second limitation. Public monitoring. I had assumed that when I saw you act, I always observed what you did perfectly and publicly. Now, That doesn't need to be the case. For instance, if we're playing a prisoner dilemma I think that, you know, I think that there is a small chance. That I will see what you did wrong. So you are actually working and with the probability axilon, small as you want. I see you shirking, or when you're shirking with probability epsilon, I see you working, meaning that there is, I can see what you do. I almost surely know what you do, but there is a small, very small probability that I see the wrong axion, OK? Is it, the model is clear? And now let's think about me playing the infinite repeated prisoner dilemma. This is a version with slightly different pain. Static Nash equilibrium dominant strategy 00. We want to know if we can enforce both of us cooperating. At every point in time in this private monitoring sector. Now, let's think about my trigger strategy. The trigger strategy said, OK, we cooperate. And if someone defects only once. We will start playing the forever, both of us. Now I'm playing this game. We're playing it, and I see one of you playing D. OK. And now I ask to myself, What should I do? Can I should punish them? That's what my equilibrium tells me to do. And if I punish them, I know that from today onwards, we'll all get 0, OK? We'll all get 0 no matter what because you will see my deviation, even if you don't see it immediately, it takes you some time because it's noisy. Eventually, you'll notice that I play D and we get 0, so I can get very little. But I think to myself, I think, OK, I saw this deep. There is a chance that this guy actually deviated. But that shouldn't happen because we are playing equilibrium. I must think that you play your strategy with probability one. So what's the alternative scenario? The alternative scenario is that you were cooperating and I saw A mistake. So I had a mistake. You were playing C. My observation gave me some noisy thing, some noisy mistake, and it told me that you were playing D. Now what, if that's the case, I can, by, by playing C, I will get 3 forever. If instead I switch to D, I will get 4 today and then 0 forever after. That's worse. So now, I need to think what event is more likely between these two in one event, in the case you deviated, I want to punish you, and in the case in which you didn't deviate and I just saw your action wrong, I don't want to punish you. Now what do they think is more likely? I'm playing Nash equilibrium. You cannot have deviated. So the only thing that can happen is that I must have seen a mistake. Because you are playing your strategy with probability one. So the mistake is my observation. So I conclude, it's for sure that I saw what you did wrong. You can't have deviated and now I don't punish you. But if I don't punish you, you wouldn't have cooperated in the first place because you would have deviated. Because, you know, you can deviate in every period. This person and get a 4 in every period, the person will never punish you and so you can get a 4 forever, which is better than a 3 forever because punishments evaporate, incentives to comply evaporate as well. with private monitoring, I can't be sure about whether you deviated. And if I'm not sure, I will give you the benefit of the doubt by equilibrium. And if I give you the benefit of the doubt, I cannot get you to cooperate. Because you will take advantage of my benefit. OK, so private monitoring is really problematic. It's not the fact that it's noisy, what we see the problem. The problem is that it's it's noisy and private. You see, if, if we all knew what we had seen, you know, a D was seen today, I could punish you for a period, then go back. We know that the technology was noisy today, so we throw away the period. But now I don't know if, If this is common knowledge, so it cannot be common knowledge, the punishment phase, and so There is no way to resurrect cooperation. So, repeated games are very plausible, are plausible in setting, and they give you nice equilibria, which are, I think, have reasonable counterparts in real life, but they work well only in settings where you have public monitoring. As soon as you introduce private monitoring and this doubt in the mind of people as to whether the opponent deviated or you observe the mistake, That everything evaporates. You can do nothing to punish me because, you know, I will never be able to test whether you did it. I mean, there are ways to test whether, so a full theorem here is still to be established. There is a long, long paper by Sugaya who claimed that had it but has never been published because it has over 100 page proof and people don't know whether it's right or wrong. Uh, so there is still the hope, but you know, how I, how would I do it is that I cannot punish you immediately. So I need to see you over a long, long period of time, and I need to know, check whether the mistakes I see can be generated by a stochastic process that is independent noise, and then I can do tests of that over time. Of course, that will be costly, but I'm very patient and there is a hope that you can resurrect it, but that's still an open result. I mean, Sugaya claims he has it, but, you know, there are doubts. OK. So for you to know. But, that's all I wanted to say about dynamic games. Let me say that there is a big class of dynamic games which we didn't do, which is looking really at private information and dynamics, and that you will do with Martin next term when you do Bayesian games. So, that's it. Not accessible, so I did it soft, just a storytelling. And yeah, if you don't have questions about the specifics of this, I'll move to revision. OK. So I've been teaching this course since forever. So, it's unlikely unless you go back more than 12 years that you will do exams that I haven't written. That being said, also the content of the course has changed a bit over time. So don't overinfer two months from past exam papers. You know, exam, if you go very backward 3 hours, all of, all in one exam, then they changed to 2 hours, you had COVID. Years, uh, in which exams were taken home 24 hours, one year, 4 hours the other year. So, you know, just be mindful when you look at those assessments that, you know, things were happening and you cannot think about them in isolation. OK. Let me do this first. Let's first think about the topics we covered and topic by topic, what is it that we should be on top and whatnot, and then we talk a bit more about the exam. And how to prepare. Consumer theory. So, first slide said axioms and utility representation, yes. I don't need you to remember proofs. Now, remember that though, if I think about finitely many alternatives. That's a very easy representation to get, meaning that you just, what's the utility of an alternative, the number of, of alternatives that are strictly worse than this, so that, you know, I expect you to be able to think about is not remembering the proof we did together is is knowing how to do something more basic. Solving utility maximisation, sure, but that's easy 400 and finding Marshallian demands, you know, that will come in handy in the GE question. I tend not to ask necessarily question about deriving demand in the short question, but you know, when you do that your box question, which will be the long question, you know, you'll have to find the Marshallian demands. Same solving for expenditure minimization, knowing the duality, you know, I don't Back in the days, I was asking some of the proofs that we were doing in lecture in the exam. Now I no longer do it. So, you know, I will not do that. That doesn't mean that I cannot use some intuition for that to get you to prove stuff, so you shouldn't neglect proofs entirely, but let's think about which proofs you should remember and which not. So, here, OK, solving this problem. The properties of the value function of this problem, yes. Because, you know, I give often problems where I give you a function, a value function, and I ask you, can this be the solution of this type of problem? And the answer is you check, you need to know which properties that must be fulfilling and test whether these properties are fulfilled, so yes. I think that remembering at least for one of these problems, the proof of how you prove that the value function has some convexity or monotonicity property, which we've done 4 times and it's always the same style of proof. It's worth remembering because I've asked variant of that proof in the past. It's not that I asked you to tell me that proof, but I, last year exam, if you look, there was a question that was That if you know that proof was a triviality and otherwise it was hard. But that's proof. I don't need you to remember the duality proof. I need you to remember the duality relationship because it helps you remember Roy and Slavsky and whatnot. Alternatively, you can remember Roy and Slavsky, but it's much easier to remember duality and it has many more consequences. In income and substitution effect, how to compute them for discrete price changes? Yes, it's a very boring question I've given in the past. But then, you know, you compute your Hicks and change your Marshalian change and you know, one is a substitution effect, the other is the total, the difference is the income. I find welfare measures boring, you know it. But you know, at the end of the day, it's integrals under to Hicks and or under the Marshallian, you can as well remember what these are, you know, you can get confused about which is with the old utility and which is the, with the new utility. So what, which is EV and what is the CV I always confuse. But I know what the three are, then maybe I get confused about what is CV and what is CV, so that I would excuse, but. Very unlikely. Who is it? Producer theory. It's just consumer theory redone. So I find it boring. If you know consumer theory, you know, producer theory, eventually, when you will go to graduate studies for those who do or continue studying, remember, it's an important thing. You need to remember technology and production possibilities, but, you know, at the end of the day, here you're down to solving. To optimisation problems. If I give you something of that sort, you can surely do. It wouldn't be an exciting question. So, I mean, for me, I see this as a grand topic and I tend to focus here. I don't see them as two separate topics. GE absolutely focused on exchange economies, you know, again, like with production, you know, it's just adding technical details without doing much. And yeah, you need to be able to solve exchange economies. You need to know your Varra's Law because you will, it will be your tool number one to solve for this. If you forget about Varra's Law, you are in a weak position in terms of starting to solve the problem. Of course, the definition of what a competitive equilibrium is. And of course, uh, the notion of Pareto efficiency, you know, the last part of the long question ask you always about what Pareto about the contract curve, potentially about the core, focus on the contract curve, uh, first, and yeah, I often ask you whether welfare theorems apply, so you need to remember what the assumptions are, and you need to remember those theorems also because they are very useful. In terms of understanding what to expect from the problem. You know, if I don't have LNS, you know, I know I have a failure of the first welfare theorem, so I start to think that, you know, There may be competitive equilibrium that are inefficient. I may not necessarily have market clearing, and so, you know, I may not even have solutions that are on budget constraints. So I know a lot of what I want to do. So, it's important that you remember the statement. For the second welfare theorem, often the easier statement is the most useful one. The second one confounds that with equilibrium existence, remember both. Super unlikely I will ask you this proof, because, you know, it will be a memory test and I know, by the way, you know, in the future, you will not need that memory. You can look it up when you need it, so, yeah. Externalities production economy is, uh, production, we said very unlikely. Externalities. I've had questions in the past, but again, it's not the most exciting problem, but I've had questions, one year, I think. When you look about the example about equilibrium with spite, I think in the extended problems. Remember that that doesn't have externalities. The fact that my level curve sits on top of your level curve and that our preferences are completely misaligned. Doesn't mean we have an externality. When you will look about that problem. I think that there will be an agent that has utility of XA. And the other agent will have utility minus because I want to flip the order. Omega, which is the aggregate endowment minus XB. So this will mean that the level curve sit on top of each other on the edgeworth box. But they come with different signs. Both are increasing, you see, this is monotone. If U is monotone, this is monotone index A and then this one is monoton index B because the two minuses make a plus. So this is an example where, you know, if I think about this Edgeworth box here, there will be the level curve of consumer A will be something like this, U of A and this is U of A of XA. This is U of B of XB. So the level curve of A will be living there and the level curve of B will happen to live on top of it. So there are no externalities in this world. They just, the two-level curves coincide. Nothing I'm happy when you are unhappy, but it's not that I want to make you unhappy. It's just we have completely iphetic preferences. About the split of the part. Now, when you look at that example from just observing this, then how you argue it will be hard, but from just observing this, you will know that everything is efficient because upper contour sets are always split and that if this level curve is not linear. Nothing is a competitive equilibrium because I cannot split the upper contour set through a price plane which is flat. So You know, when you look at that example, rest assured that you know already the answer. The point is how will I go about showing it. But it's not that you have doubts. So, you know how elegant you are in proving these two insights in that result. When you look at that, that was a past exam paper, you have to think that that would have made a difference to the point you got, but that in a sense, here you knew already what you were shooting from, from the beginning. So when you go to the GE question, you should try to put yourself in this situation before you solve any algebra. Before So I know what I'm going down to solve before I do it. Then am I successful in showing what I want? Great, I'll get more points. Am I less effective? I get fewer points, but at least I know what I am trying to do. You know, part A, when you solve for the Marshalians, you can do it with absentmindedness. Part B, when you go for competitive equilibrium, you better have a sense of what you're trying to do. OK? So, remember, you know. Anyway, remember, for Leontiev, you need to consider all the possible price vectors, so also vertical ones or flat ones. Don't forget about zero prices. There will be too good, so you have three options. Both prices are positive. One is positive and the other one is zero. Both zero is extremely unlikely if anything cares at all, if anyone cares at all about anything. You know, Don't go down. Remember, you will come to the problem with no negativity constraints. Don't go down necessarily and ride the biggest La grandson you can. Which will generally come with 3 multipliers if you have 2 goods. Try to rule out some of these multipliers to begin with by arguing that one of the constraints is must be slack and so the utility, uh, so that multiplier must be zero. Remember how that in general if I have Some objective and I have, say some 3 constraints that live that I, that tell me that I must live in this triangle just to give a random example. How do I show that I, a solution cannot be the orange dot is just that I find whichever point I want inside here. Let's say this one. And I show that the value at this point is higher than here. If for any point on this line, I can find something better inside, then I know this multiplier is 0. This is very easy to do in many problems. Please do it and don't write the full multiply Lagra because you will lose a lot of time. When I ask about Pareto efficiency, And you don't have differentiable stuff. What do you try to do? What do you try to do? You have, but all utility functions are different, but you sand them with the weights. And you take first order condition. Now, if they're not differentiable, you could do the same. The problem is still there, but, you know, you cannot take 1st order condition. So, you try and show that an allocation X is Pareto efficient. And then, you know, you want to argue that you cannot uh find another allocation X hat, which remember is an X hat A, Xhat B such that X hat. I belongs to the upper contour set, let's call it UC whatever, of agent I. With utility what UI of Xi bar. OK. So, basically, I cannot find something that is here. How could you do it, for instance, with the Leonte I would tell you, you know, if you need to be in this upper contour set, you need to consume more of good one. That's true for all players and so both of them cannot consume more of good ones. So if one consumes more, the other one consumes less. OK. If you can do it formally, great. If you can do it informally, that's OK. Generically, what I get on part D of question 5 is a plot and some gibberish. Than that. Generically, but you know, that's the, the modal answer because you run out of time because you don't time manage. So, on that, you know, I get very, the quality, probably because people also perceive it as a risky question, not just time manage, they prefer to invest the time somewhere else. But that it's easy to do more than the average answer I get in there. The key question is particularly not so long. Let me comment on it later this year. So please try and make a sensible argument as good as you can. It doesn't need to be perfect about why the allocation that you're suggesting are. If you don't do nothing, at least put down the definition of Pareto efficiency. Put down your conjecture, which should be based on what? On the welfare theorems. Mhm. We can talk more about this later. But bottom line here, you need to know where you're going before you start. Uncertainty, uncertainty, yes, I generally put the short question on uncertainty. I cannot confound it. Uh, there can be question about checking whether a utility function fulfils some axiom, generally the independence axiom. They can be questioned about the value function or there can be simple problems like the insurance problem we saw, but in some other application where I Ask you to derive some demand. Given that you display expected you. OK. Again, as Bale are beautiful things, but you didn't get problems on that, so it's unlikely. I will assess. Risk attitudes, yes, it's interesting to know when a person is generically more risk averse than another one, but what do you want me to ask about that? That really, that I can ask. Last topic Which is like the first one, which was producer and consumer theory, game theory, as in a bit, two parts. One is static games, one, the other one is dynamic games. For static games, I want you to be able to find me Nash equilibria rational strategies in Simple games, rationalizable strategies. Know, the definition, the difference. For complete information game, finite horizon because or infinite horizons, repeated games, but there, you know, I'm a bit constrained into what I can give you because either I give you something that is close to what you've seen, which is boring, or I give you something you cannot do, which is unfair. So, um. So it's most likely I will not go there and then I will do finite horizon. I can be very creative there, perfect information and you see, we've seen, we sold a bunch of games together. I know how you feel about the durable goods game that you perceive it as very time consuming and happy. So that's called OK. That's how, what to study in terms of content. Remember, the slides are self-contained in the sense that I would not never assess things that are in the book and not in the slide. If you want to read parts of the book, the one we suggest, or some other book to complement your understanding. I couldn't be more in favour, but it's for your general culture. Or because you miss, you want a second interpretation on something, but, you know, it's not that you will find some things that, you know, you need and that we haven't done. About problems, yes. Normal problem sets and handing, you should be on top. By the way, nobody complained that I didn't post the handing one solution until yesterday. I just noticed myself, and so I did post them yesterday, but you know, you're very good guys, you know, generally I would have been complaining very soon. So, thank you. But now they're online and next week you will have also the one for handing problem set two. Yeah, so, those, look at it. You know, I know that handing problem set two has a structure of an exam, but is a bit longer than an exam. That's fine, you know. I am aware of that. Um, in terms of extra problems, these are problems that you should use for, to revise definitely. Don't do the unusual one. Or the easy one, do them if you need. Otherwise, don't. Um, the rest is a good idea to try them. Remember that not all of them were written, so a bunch of them come from past exam papers, but they come from different incarnation of the past exam papers, so don't draw too many conclusions about how much time you should take on them. But do practise. I think it's a good way to place where to practise. I put them there with all the solution because I thought it that it was useful. So, I revised problem last year. So last year final is not in the extra problems or in the problem set. I would give it a shot to do that final. Maybe you can keep it as your final prep before the exam. There are solutions for that, of course, on the movement. About the exam, you know, many of you will already know it's structured so that you have 4 short questions worth 60 marks. 15 marks each. And section B, that is 1, the GE question that is worth 40 marks. You have 120 writing minutes and # Gravity Model Project: Progress Summary
+
+## 1. Project Setup
+
+### Folder Structure
+Created in File Explorer:
+- `gravity_model/` (project root)
+- `data/raw/` — Original downloaded data
+- `data/processed/` — Cleaned datasets
+- `code/` — Python scripts
+- `output/figures/` — Charts
+- `output/tables/` — Regression tables
+- `paper/` — LaTeX files
+
+### Development Environment
+- PyCharm as IDE
+- Created virtual environment (`.venv`)
+- Installed packages: `pandas`, `numpy`, `statsmodels`, `scipy`, `matplotlib`, `seaborn`, `jupyter`, `linearmodels`, `stargazer`, `wbdata`, `openpyxl`, `xlrd`, `kagglehub`
+
+### Version Control
+- Set up Git/GitHub with `.gitignore` file
+
+---
+
+## 2. Data Acquisition (`data_fetch.py`)
+
+### GDP Data
+- Source: World Bank API via `wbdata` package
+- Indicator: `NY.GDP.MKTP.CD` (GDP in current US dollars)
+- Date range: 1990-2023
+- Output: `data/raw/world_bank_gdp.csv`
+
+### Distance Data
+- Source: CEPII GeoDist database (manual download)
+- File: `dist_cepii.xls`
+- Contains: Bilateral distance, common language, colonial ties, shared border, etc.
+- Output: `data/raw/dist_cepii.xls`
+
+### Film Data
+- Source: Two movie datasets (Dataset 1 and Dataset 2)
+- Files: `movie_data_1.csv`, `movie_data_2.csv`
+- Contains: Budget, production companies, production countries, release date, title
+
+### CPI Data
+- Source: World Bank API via `wbdata` package
+- Indicator: `FP.CPI.TOTL` (Consumer Price Index, 2010 = 100)
+- Country: USA only
+- Output: `data/raw/us_cpi.csv`
+
+---
+
+## 3. GDP Data Cleaning (`gdp_data_cleaning.py`)
+
+### Steps
+1. Loaded World Bank GDP data
+2. Removed regional aggregates (e.g., "European Union", "World", "High income") — kept only individual countries
+3. Dropped rows with missing GDP values
+4. Created log GDP variable (`log_gdp = np.log(gdp)`)
+
+### Output
+- File: `data/processed/gdp_cleaned.csv`
+- Result: 220 countries, years 2010-2022
+
+---
+
+## 4. Distance Data Cleaning (`distance_data_cleaning.py`)
+
+### Steps
+1. Loaded CEPII distance data (required `xlrd` package for `.xls` format)
+2. Replaced `'.'` placeholders with `NaN` in weighted distance columns
+3. Converted `distw` and `distwces` to numeric
+4. Created log distance variable (`log_dist = np.log(dist)`)
+
+### Output
+- File: `data/processed/distance_cleaned.csv`
+- Result: 50,176 country pairs with distance and gravity variables (contig, comlang_off, comlang_ethno, colony, comcol, curcol, col45, smctry)
+
+---
+
+## 5. Film Data Cleaning (`film_data_cleaning.py`)
+
+### Initial Exploration
+1. Loaded both datasets:
+   - Dataset 1: 45,466 films
+   - Dataset 2: 1,356,719 films
+
+2. Filtered for usable data (budget > 0, production_companies not null, production_countries not null):
+   - Dataset 1: 8,890 films
+   - Dataset 2: 34,070 films
+
+3. Checked for overlap:
+   - Zero overlapping IDs
+   - 7,977 overlapping titles
+
+### Combining and Deduplication
+4. Extracted year from release_date
+5. Combined datasets and deduplicated by title + year
+6. Filtered to 1990-2023
+7. Result: 25,477 films
+
+### Parsing Production Data
+8. Parsed production_companies and production_countries (stored as string representations of lists of dictionaries)
+9. Extracted country ISO codes from production_countries
+10. Counted number of production countries per film
+
+### Filtering for International Productions
+11. Filtered to films with 2+ production countries
+12. Result: 1,850 films (all from Dataset 1)
+13. Decision: Use only Dataset 1 since it has correct production company ordering
+
+### Assigning Home Country
+14. Extracted lead production company (first listed company)
+15. Created studio-to-country mapping files:
+    - `studio_mappings_high_confidence.csv` — Well-known studios (236 companies)
+    - `studio_mappings_low_confidence.csv` — Smaller/obscure studios researched with less certainty (340+ companies)
+
+16. Applied mappings with confidence flags
+17. Removed films with no lead company (empty production_companies list)
+18. Final result: 1,790 mapped films
+
+### Output Files
+- `films_with_home_country_all.csv` — All films including unmapped
+- `films_with_home_country_mapped.csv` — Only films with home country assigned
+- `films_with_home_country_high_confidence.csv` — Only high confidence mappings
+
+---
+
+## 6. Building Trade Flows (`build_trade_flows.py`)
+
+### Steps
+1. Loaded mapped films data
+2. Removed films with no lead company or home country
+3. Calculated budget share per country: `budget_per_country = budget / num_countries`
+4. Created bilateral pairs:
+   - Importer = home_country (production company's country)
+   - Exporter = each production_country
+   - Excluded domestic pairs (home_country = production_country)
+5. Aggregated by country pair and year (summed trade values, counted films)
+
+### Results
+- Total bilateral records (film-level): 2,996
+- Unique country pairs: 528
+- Pair-year observations: 1,612
+- Year range: 1990-2018
+- Unique importers: 48
+- Unique exporters: 101
+
+### Output Files
+- `trade_flows_by_film.csv` — Individual film-level records
+- `trade_flows_bilateral.csv` — Aggregated pair-year data
+
+---
+
+## 7. Inflation Adjustment (`adjust_inflation.py`) — In Progress
+
+### Steps
+1. Loaded bilateral and film-level trade flow data
+2. Loaded US CPI data from World Bank
+3. Set base year to 2018 (latest film year)
+4. Calculated adjustment factors to convert nominal to real (2018) dollars
+5. Applied adjustment to both datasets
+6. Created log trade variable for gravity estimation
+
+### Output Files (to be created)
+- `trade_flows_bilateral_real.csv`
+- `trade_flows_by_film_real.csv`
+
+---
+
+## 8. Still To Do
+
+1. Complete inflation adjustment — Run the script
+2. Update GDP data — Re-download for 1990-2023 range to match film data
+3. Merge datasets — Combine trade flows with GDP and distance data
+4. Create final gravity dataset with all variables:
+   - Dependent variable: log(trade_value_real)
+   - Independent variables: log(GDP_importer), log(GDP_exporter), log(distance), contig, comlang, colony, etc.
+5. Estimate gravity model using `linearmodels` or `statsmodels`
+6. Export results to LaTeX tables using `stargazer` reading minutes to begin with. The 15 minutes to begin with, you will use to read in a relaxed way the entire final and to strategize carefully about the order in which you will answer questions. Me, by which I mean that you will start with the questions you are most confident about. You will not go for the strategy where you find out at the beginning about whether you can solve the hardest question in your mind that will just lead you to panic and anxiety. So please, let's get You may be wrong, we all are wrong sometimes, but you know, you do your best guess in those 15 minutes, not just about, yeah, which are the easiest in my opinion, but also what do I think that Francesco wants from me in this question, you set out the order, and then you are just committed to that order. Almost nash. Knock game perfect. Short questions in your first iteration, you will devote 15 minutes to them. When the 15 minutes have passed, you move to your next question. You don't stick there half an hour thinking that this is your best question, and so it deserves a lot of time. Also, because the marginal points you will get are much smaller because there are decreasing returns than the initial points you can get in a question you don't know much about. Same for the long question, you should start investing in that 40 to 45 minutes. That will leave you with 15 to 20 minutes at the end where you can. Sort out your miss first of all, you will be delayed no matter what I say. So yeah, be prepared. I would be too Second of all, you can use the minutes that are left to revisit what you have left open a bit in those questions because you leave some space at the end to come back and fill the gaps in the time you had, but you at least won't have lost the opportunity to get the easy points on all the questions, which would be foolish and that's a subset of people thinks that it's an optimal strategy. We award partial credit. It's true that it's not wonderful, but we do, do, and we are generous about partial credit, so, you know, you should be aware. How should I answer questions? Should I answer questions like Francesco's solutions? No way. No way. Francesco's solutions are at times very dry, at times excessively mathematical, for sure, written with having a lot of time to do this carefully. That's not you. That's not you in the exam. Maybe you at home, but not you in the exam. So, you try to make the point as convincingly you can in an elegant way, as elegant as you can, and then, you know, you don't. Go for overkill, all the second-order conditions, you know, first you get the answer, then you add the embellishment. So, don't over obsess. There are many, many correct answers. Know that I don't think you should get full points on any question. It's the religion here, you know, you're great if you get 9 out of 10. Uh, you shouldn't get less than 2 out of 10 even if you're horrid. Uh, so that's the motto, you know, I'm used to Italian high school. In Italian high school, our marks would go from 2 to 98 marks. So, you know, 85, top result. It's just a scale. Like we've done a lot of things where currency didn't matter. It doesn't matter here either. How many zeros I put on your numbers. Yes. What about the notation, because like, for example, the game
+
+SPEAKER 0
+theory questions, sometimes writing in English is Easier, right, is that the equal amount of points that you use the correct notation.
+
+SPEAKER 1
+I don't care about the notation, but I want to see the inequalities. Look, if you're trying to tell me that something is a nice equilibrium, at some point, I will want to see some inequality. How you write the notation for that, you know, if it's mixed, if you write PQ instead of my sigmas, I couldn't care less. But you, if you want a star for the equilibrium strategy or something like that, I couldn't care less, but you still need to show me that I prefer my strategy to other, other strategy given what the other guy is doing. So provided you do that, if you just say it in words, there is a way of doing it careful, but you need to tell me what the payoffs are. So I don't care about the notation at all. I care though that you show what you say. It's not that you know. Remembering in theory, an equilibrium is not the payoff. An equilibrium is a st always. Always. Don't give me the payoff. I like the payoff, but then I ask you what's the Nash equilibrium payoff. I know how to ask that. About this year's exam. So, as I've told everyone, the DA thinks that it's one of the most sens, if not the most sensible exam I have ever written. You know, you grow old, you learn things. Maybe. Uh, as I told you. There will be one question about consumer producer theory, short. There will be one question about uncertainty. That will lead to questions about the game theory. Because it's a big deal. Guess what? One static, one dynamic. They do, and you know. I mean, I've told you so much already, if you look at the previous thing I've said. The question, No Not there yet.
+
+SPEAKER 0
+I mean you will take the derivative in one of
+
+SPEAKER 1
+the short problems so that those who know derivatives can really show me. But in this question, there will be no derivatives. So actually you sketch the box carefully and you sketch the level curves carefully and you get a sense of what the upper contour sets are. This year's the question is Christmas two weeks later. So please plot those things. Please remember your definition is just two Pareto efficiency and competitive equilibrium. And if you do that, I think this question you should be fine. One of the utility function you've seen very many times. The other one will be new. It won't be hard to draw the level curve, and if you actually think. A moment about what that utility function says by trying to consumption bundles and getting a sense of what utility you get. Then you will know everything. Of that demand and of that question. If you try and stare about it. Without plotting anything, yeah, you may end up in trouble, but it's a really easy utility function. You've never seen it, and it's very easy. What else can I tell you? Not much. Star the game will be. Jolly days, really. You will like that's not big game. The only problem is writing the expected utility, but I give you plenty of hints. And, yeah. The rest, uh, I think it's fine. No, that's the certainty one where I give you hints about how to write the expected utilities. So, it's full of hints. I think you shouldn't be too stressed about my exam. If you can do last year exam paper, I think this one is more reasonable. So, No ATA agrees that go ask if it's not what the the question. But you can ask and, you know, she told me it should be good, so hopefully it is. What can I tell you? I will stay. And I will set you free. I stay to answer any question. I one thing. I will be away until the, you know when the exam is. Um. OK. So, I will be, I know. We'll be out next week. I will be away until the, 11. So, if your exam is after the 12th, I will do the office hour in person. I'll do a 1 hour final office hour before the exam in case people have something to ask and panic. If your exam is after the 12th, I will do the office hour on Monday the 12th, provided it doesn't clash with your exam. If it clashes, I'll do it when you're done with that exam. If it's before, I will do it online. I will be away, but, you know, I'll do a Zoom call and we can have a mini session. Yeah, that's it. So. You know, I really enjoy teaching this course. I really enjoy the master's student. You are the best thing that the LSC has to offer. I love my PhD students too, but you know, you are more, and you will go out and make a difference whether you go on to academia like some of us, or whether you go public sector, private sector. It's a very important programme for the school. It's a real bliss to teach you. You're intelligent people, you're young, you're optimistic. You still think you can make the difference and you. Sharing this time with you is lovely and I really thank you. So keep this intent. Remember, whatever you do, fail, success, who cares? Try to live with intent. Life is much more joyous if you do. So, nothing. It's been really, really, really a pleasure to be with you, teaching you. I'll be here next term. I will not be teaching. I'll do pastoral office hour if you want to come talk a bit about research careers or whatnot. I'll be there. Uh, I'll have more time. So, thank you so much. I hope you have a wonderful day.
+
+SPEAKER 0
+You know that for me, you will always be more
+
+SPEAKER 1
+than the damn number you get in the exam. Whether you get a 30, a 40, a 50, a 60, doesn't matter. It really doesn't. I've helped everyone, so. Have a lovely break. And if you want anything from me about the course, I'm here now.
+
+SPEAKER 0
+Yeah Now, course office hour now.
+
+SPEAKER 1
+If you want, pastoral, shoot me an email, we can figure something out.
+
+SPEAKER 0
+OK I have. Um, it's just a short one. What you show this, then you don't show it in the. So it's one of those things I I wouldn't do it.
+
+SPEAKER 1
+Look if it's X Y, you know, I will log
+
+SPEAKER 0
+in and say some of the blog. So if you have, yeah, if you see something like that, do it. If it's not like that, come back. I mean, you say why you invoke it and if there are some conditions to check the quick moving on the spot. If you are small, you can take them. Hey, I've got a, um, I've got a a. and trying to grow and you can do it in
+
+SPEAKER 1
+the maximum preference you can do it.
+
+SPEAKER 0
+So come up with your own. Yeah, I think that. I No problem. I was just wondering if you could talk a little bit about that because it feels like we're not defining the feasible or or I guess it just means R plus, right. So X is an allocation.
+
+SPEAKER 1
+Let's say in my example is an element. This is a set of feasible allocation. Let's call it feasible is a subset of R plus such that, and remember this, you should think about it as XA1 X.
+
+SPEAKER 2
+22 blah blah blah X 1 A plus 1.
+
+SPEAKER 1
+P is smaller or equal than omega.
+
+SPEAKER 0
+A plus omega.
+
+SPEAKER 1
+So, this is your feasible set. Yeah, Friday. OK. And now we are thinking. Yeah, I'm trying. I actually have the microphone here. So, and actually, so we are trying to find of this subset. Um-hum. The ones that give you Pareto efficiency. So which, so everything is defined in this space, and then you need to say that, you know, if, uh,
+
+SPEAKER 2
+X, uh, X belongs to XF and there is no
+
+SPEAKER 1
+Xhat such that X, uh, hat I belongs in the upper contour set. If you want weekly of consumer I, let's do 1 + because it's the week after 1% of utility UI, which is the thing I was writing Xi, meaning these are. This is a consumption bundle for I that comes from this feasible allocation and that gives consumer I at least as. And then for some I, it belongs in the plus plus set, which is of U I X I, which is. So that's efficient and just to be super tedious, let me remind you that UCI plus, um I X I. Consists is simply defined as a set of XI hats, you know, the quilt I use my hat before, such that the utility of consumer of getting XI.
+
+SPEAKER 0
+Yeah. I get this general form, but the, There's like sometimes it's written as kind of like this, but element of a feasible sentiments and requirement here and I appreciate that you can probably figure out that expression from using these conditions, but it's not like, could you, would it be fine to answer the question just stating all of these conditions separately or do you really like that expression?
+
+SPEAKER 1
+No, no. OK, look, this is what you do when I tell you that the solutions are written by a person that has time. It's a person that has time to work out. What this implies in this.
+
+SPEAKER 0
+Yeah, because it, it seems really hard to think about that from these.
+
+SPEAKER 1
+Immediately. Immediately, yes, unless you have a good conjecture. Yeah. Saying the splitting problem here, I had a conjecture that everything was efficient, so it was easy. So if you don't have a good conjecture, you give me this. If you have a good conjecture, you can probably work through this. Yeah, I mean, look, if I had two mean guys with a square box. I know it's a 45 degree line and so I would write that to find, but if not, then it's
+
+SPEAKER 0
+fine to stick with these and just stipulate.
+
+SPEAKER 1
+Yeah, but look. Think about the butterfly. Writing the, the Pareto efficient allocation, that contract curve in the butterfly space I could have done it even without writing this. It was easier than writing this in the butterfly problem. Yeah, that's perfect. So, I would take whatever is easiest. Um. Let me, OK. Not whatever you like, but whatever is easiest. Got you.
+
+SPEAKER 0
+Perfect. Thanks so much, Francisco. Is it OK if we have everybody just sit in
+
+SPEAKER 1
+the rows and ask questions? Yeah, I'm OK. You want to sit and ask questions sequentially. You are, you are the first, but you know, we need an auction with numbers, OK. I mean, just if you sit on the order on
+
+SPEAKER 0
+the rows from the, from there to 123.
+
+SPEAKER 1
+OK, Marco, you organise it. Uh, yous next to her.
+
+SPEAKER 0
+And and he's like uh anyway, why don't you ask
+
+SPEAKER 1
+me your question while we wait.
+
+SPEAKER 0
+Yeah. Yeah. You guys keep the microphone.
+
+SPEAKER 1
+If we have only one consumer that fulfils LNS and the other one doesn't fulfil LNS, of course we can have excess excess demand, you know, we, we saw the problem. You remember this problem where we had this guy that had boxy preferences, that guy that has this Coob Douglas. We had said that we had competitive equilibria where XB was here, XA was here. One consumer had LNS and yet we had excess supply in every market. Excess demand you can never have.
+
+SPEAKER 3
+Yeah, yeah, excess supply, but like in my head it doesn't make a lot of sense because if consumer A is maximising his utility.
+
+SPEAKER 0
+The middle point.
+
+SPEAKER 1
+Yeah, who cares? Consumer B doesn't know. It's true that there are other competitive equilibria that are better, but competitive equilibrium just requires everyone to maximise in in their budget, and this they're doing. If this is the budget of B, that's the best he can do. If this is the budget from A, that's. The best he can do and feasibility. It doesn't require that there isn't another competitive equilibrium in which everyone is better off. In this case, there is a competitive equilibrium in which people are better off, both of them.
+
+SPEAKER 3
+Yes, but why wouldn't the price be like smaller and
+
+SPEAKER 1
+Because, uh, there is nothing in that in the definition of competitive equilibrium. Remember, the definition of competitive equilibrium just says everyone maximises in the budget and then, and there is excess supply weekly. That's the definition, whatever. Crazy idea you have from undergraduate about prices dropping to equilibrate demand and supply is a crazy idea because it's preferenced on monotonic preferences and not in general. OK. So, here, you know, the definition holds, this is a competitive equilibrium. Um-hum. OK. Everyone is happier. It's true, you know. A could give to B this stuff and he would be happier, but why should you? He's as happy as he can be. OK. Thank you. Next question, move the. Oh, yeah, you can. You can get the mic, so I, we can actually all hear. OK, the question It's your iPad, man. You're really. Give me the iPad.
+
+SPEAKER 0
+I'll give you that. Classical. Uh, OK, so first question formally, uh, when like we
+
+SPEAKER 2
+have this situation here and you, so you sold for market clearance because you assume it at the beginning, then you find that it doesn't work, can, can you, it doesn't in some, I mean, look, you would if you
+
+SPEAKER 1
+were in post-market clearing, you would have found the equilibrium here most likely, and you would have thought, oh, this is the only no, no, no, let, let's suppose we're
+
+SPEAKER 2
+smart enough to understand that's not all the only equilibrium. Can we have an equilibrium in which there is a continuum of prices so we, we solve it for the the inequality or here there would be a continuum of
+
+SPEAKER 1
+equilibrium and even if the prices are continuous, yeah, there
+
+SPEAKER 2
+is a continuum equilibrium on the K on the endowment.
+
+SPEAKER 1
+uh uh uh uh uh that's one because I give you the simple endowment that is here. If I gave you an endowment that is here for a given endowment, you can have multiple competitive equilibrium because of the prices, because it's because you can have them flat, but it's just here, you know, you pivot on the and formally you prove that by solving by the
+
+SPEAKER 2
+normal market tree with the inequality and then you say, well, since the price, you just need the price to be lower than look, I just find the Marshall and
+
+SPEAKER 1
+the men. And then I write them into, I sum them up. I know how to sum two functions. We know that? I sum. There is an inequality which has numbers on the other side. I know that that inequality only the price ratio determines, and I solve for the price ratio, which is a single number for which this is satisfied. It will say the price ratio has to be smaller than 5. OK, and that works even if the because I thought
+
+SPEAKER 2
+that in equilibrium the price should have been like pinpointed in a way, but that's, that's the crazy undergraduate, uh,
+
+SPEAKER 1
+no, price level is never determined, not even in undergrad.
+
+SPEAKER 2
+No, but you need to have like an agreement with price and quantities. Instead you have an equilibrium with a continuum of price and a continuous of a quantity.
+
+SPEAKER 1
+No, you have a continuum of equilibria each with the price and with the quantum, but then you have a
+
+SPEAKER 2
+continuum of a continuum with the k, which is fine, I guess.
+
+SPEAKER 1
+OK, there is a contin.
+
+SPEAKER 2
+OK, OK, no, fine. You answered my question. I have another one. I need the iPad to explain it.
+
+SPEAKER 1
+Notice that here demand is always single valued for both guys. So you know, you don't even have correspondence valued demand.
+
+SPEAKER 2
+OK, suppose that you find the contract curve that is on the lower diagonal, then, uh, formally you would have to argue like to get all the points like up you can see on the iPad up from, uh, like northwest, southeast want me to argue if I want to
+
+SPEAKER 1
+show that this is the contract curve left and right,
+
+SPEAKER 2
+northeast and southwest, you know.
+
+SPEAKER 1
+uh, yes, what do we have to do in northwest, uh, like you have to argue why this side, yes, formally, formally, formally, formally. Informally, I say it, OK. Now, here, if I'm in a rash, what will I do? I start thinking to myself, OMG. Do I need to consider feasible allocation or allocations that clear the market? And then I start to worry because there are many more feasible allocation that market clearing allocation. Remember, market clearing means that XA and XB live on the same spot. Feasibility means that XB is northeast of that. So, In the back of my mind, I start thinking, Let me think about the market clearing ones because I have a clear sense of what I'm shooting for, OK? And I will show you that basically all of this I can get with allocations that clear the market. Now, if I want to show that this is Pareto efficient at any point in the orange, all I need to do is give me this point, OK? Stuff that has higher utility for consumer A means that consumer A is getting more of both goods.
+
+SPEAKER 0
+Yeah, mhm, mhm.
+
+SPEAKER 1
+Which means that we are moving consumer B from this level curve to a worse one. Great So that must be Pareto efficient because in order for me to move in the strict upper contour set of A, I'm moving outside the upper contour set of B. Done. Now, I want to show That anything that is not on the orange line. It's not in the contractor. So, let me think about XA and XB. Being on this point in the graph. Now, what is the level curve of consumer A? It's just a giant box. Whatever What is the level curve of consumer B? Whatever some function passing through it, OK? And I start to think to myself that by moving in this direction, I can make both of them better off. And if I was on the other side, I would have done the same thing. If I'm up here, I try to move in a place where I come in with both. So, so it's on the diagonal on the north, that's
+
+SPEAKER 2
+what I say, northeast to southwest. How many points do you need to prove to be complete for the proof in theory?
+
+SPEAKER 1
+I mean, I only need to point that show that for orange points I cannot improve both. That's fine. And for these points I only need to find the deviation. I can do it generically, probably you're right that I will have. I mean, I, I think by moving down in this direction it works because I would do up low and right and left because I think about whether you are on this boundary of this contour set. If so, you will move down. If you're down here probably you know you. You move to the contractor, and that's your parity improvement. Anyway, an alternative is just shoot to the contractor. There is a point in the contract curve that is better for both. OK. You found, you have a strong conjecture for the contract curve. You show me that this is beaten. And that's. Both of them are better. And that's fine. That's fine. 0% of points. The thing, uh, Marco, you're obsessed with the number and that's your problem.
+
+SPEAKER 2
+It's the, it's.
+
+SPEAKER 1
+What is the thing I didn't do here? Where I would lose points if I was, I mean, I would never expect you to do it, but where is it that I lost points? I didn't check whether there are locations that are feasible but don't clear the market that are not on the 45 degree line are not Pareto efficient. So I haven't checked that those are not Pareto efficient. If I wanted to get those points, how would I say that they're not Pareto efficient? Well, they don't clear the market. Give everything to consumer B. He will be happier. A is as well off, so this cannot be Pareto efficient. So that's where I lost the points and I could have written this sentence even in words. And maybe not all the points, Marco, but you would have gotten plenty.
+
+SPEAKER 2
+No further questions.
+
+SPEAKER 0
+That last statement to hold, you need one of the consumers to be LNS, correct?
+
+SPEAKER 1
+Monotone. I used actually monotonicity in that one. you know, if I have one guy that is monotone, there can be no, uh, no feasible allocation that is not, that doesn't clear the market can be efficient because otherwise I would give all the outstanding goods to him. He would be happier and we are done. So with monotonicity, we know one guy monotonic one. We know that Pareto efficiency means market clearing.
+
+SPEAKER 4
+So when I was trying to solve the same problem, uh, I tried to solve it using the MRS conditions, which, uh, I was not able to do. Is that possible to do to find the contract curve?
+
+SPEAKER 1
+The problem is that this level curve. What's the MRS infinite. 0, infinite, 0, any MRS. Negative from infinity to 0. Any MRI is positive. So the problem is also that if you try and go in tangency because you have many slopes here, you may find a tangency condition at the upper corner, and that is just a minimum. Because you didn't check the second order condition conceptually. But you know, the only way this negative MRS can be equal, it can be here or here, and it will be here. It's just you're worried that because you're not checking sufficiency, you identify this one too.
+
+SPEAKER 4
+So, is there an algebraic way of deriving the contract curve, or do, should we do it graphically?
+
+SPEAKER 1
+Well, I told you, you know, basically, you come up with your conjecture. And then you need to show me that this is Pareto efficient, and I've told you, you know, the only way to increase A's utility is to give him more of both goods, and that would make me worse off, so that's Pareto efficient for sure. I've told you why points that are not there and that are feasible are not Pareto efficient. All I need to check is points that are clear the market and are not on the red line. are not Pareto efficient, and all I can do is to, from this point, I can always find the point. On the red line that gives everyone a higher utility, both of them and strictly. You agree or no?
+
+SPEAKER 4
+I agree, but I'm not satisfied.
+
+SPEAKER 1
+Why? Because I came, because I had the conjecture to begin with. Exactly, yes. I come back. To that ugly condition. And we were discussing before you sat down. That uh This is Pareto efficient. If I cannot find, and I have also the feasibility definition up here, if I cannot find another feasible allocation such that for every eye, I'm in the strict upper contour set and otherwise, I'm not. This will be a bunch of inequality conditions that look like that, some strict, some weak. And this will be in equality condition. All that you're trying to check is whether the system, whether the allocations that fulfil these inequalities plus feasibility is empty or not. So, you know, you can always write me down that system of inequalities whether you like it or not. Even if you don't have a strong conjecture for the solution, and that's what I would start with if I don't, look, if I have everyone with a differentiable utility, I would do the Pareto problem. Otherwise, and I have two guys, basically this boils down, and this means for both A and B, and this is the reason either A or B. And I write those inequalities, and then I start massaging them. Nevertheless, With two guys, I think. You should not give up on the idea of coming up with a good conjecture before you do it. Because going there blind. You will be much slower. It's true. I can go there blind and do it. It's just a system of inequalities. But it's a painful system. So, that's all I can say. But that's how I would put it with two guys. It's really that the requirement to be parator efficient, so you check whether this holds or not. The conjecture helps you a lot. Next question?
+
+SPEAKER 2
+Uh, just, uh, You mentioned before is the reason why the first, uh, theorem of the theorem doesn't hold right. Because if you're on the. On the right of the bliss point.
+
+SPEAKER 1
+Yeah, I don't have LNS. So, you know, yeah, here I don't have market clearing exactly because I don't have LNS, and that gives me a lot of issues. A, not having LNS. Because there are equilibriums which are on the right of
+
+SPEAKER 2
+the bliss point, but, uh, which are competitive equilibriums but are not very efficient because you could just give some more to B and, Yeah, I mean, look, you know,
+
+SPEAKER 1
+if the endowment was here, say, I could definitely come up with a price equilibrium that goes through here. This guy is bliss. The other guy, you know, we may have, no, the other guy, no, we cannot bring it to here unless he has the right slope because he may demand something else and he cannot be on the budget constraint. So in your case, where the endowment was here, it was simpler. Here, there will be limits to how much I can flatten the price because I think that if I flatten it to go from the endowment to this point. The slope of the budget line may differ from the slope of the level curve of B going through that point, meaning that's not an equilibrium, so that would cease to exist, which is what the feasibility condition would tell you. It will find you the cutoff price ratio under which this ceases.
+
+SPEAKER 2
+But in our case, which in your case, the advantage
+
+SPEAKER 1
+was that the endowment was on this line. So, you know, it was different because I could always find a slope going through the endowment whichever I wanted. That would hold me back. It was different. That's why you have the endowment on that line, because otherwise the problem is too hard. I should have given, by the way, if I was to give the, this problem again ever, I would have not given the quasiline there. I would have given a nice Leontief, call it a day. Forget about it because then checking that when an equilibrium exists and it doesn't becomes very simple. And yeah, this was, uh, I was young when I gave this problem. And I thought, actually, I'm doing them a favour because they can at least give me the demand of this. But, you know, I put the endowment here to try and make it at least doable, but, you know, I gave you more headaches than I should have. So, yeah. With hindsight, I wouldn't do that. Or I would have given you a linear demand, say perfect substitute with some ways. That's easy also. Next Here and there. You want the microphone? Yeah, I think it's if you share the microphone because that's one. I'm more, I'm poor.
+
+SPEAKER 3
+Uh, yeah, the question is about the definition of contract curve because I think there are two definitions about parental efficient. One is weak and one is straight. So, uh, which definition are we using here?
+
+SPEAKER 1
+We always use the one where, uh, where one, everyone weakly and someone strictly. So, yeah, the strict parent efficiency definition. So we don't think about flat portions of the contract of the utility space. So we tend to work with this one. Instead of requiring that this is true for everyone, you see, if I had imposed this for NEI, that would be the other definition. So this, we keep this one, generally.
+
+SPEAKER 3
+So basically, if we, uh, can, I have to give
+
+SPEAKER 1
+the other definition because when you have differentiable utility and you solve that Pareto problem, you get the solution, not to this definition. But the one which has any here. So, that's why I needed the other definition because otherwise, I cannot tell you that the solution of the Pareto problem finds Pareto efficient allocation. But I really care about this one and this year, you know, that the utilities you get are not differentiable, so you can put the Pareto problem aside. Think about this.
+
+SPEAKER 3
+OK, I think that address my question. No problem. Thank you.
+
+SPEAKER 0
+Maybe this is not so important, but it's, I'm I'm, I'm wondering. The cereal price Yeah.
+
+SPEAKER 2
+Like, OK, thanks.
+
+SPEAKER 0
+um.
+
+SPEAKER 1
+To an. OK. The, the thing where, uh, where you, iPads the magnetic field. OK, so You have a pacemaker? A computer, I see the computer there. Like it alright, OK, so, uh, so, so we say
+
+SPEAKER 0
+we have LMS, uh, utilities, and we have, uh, 101 price, uh, which is 0, and the other is not zero, and so we get they will consume infinitely, infinitely much of the zero. The maned them too much.
+
+SPEAKER 1
+No. I only want good one, M I L N S, yes. The price of good 2 is free. Will I demand an infinite amount thereof? No way. I don't care about good 2.
+
+SPEAKER 0
+Yeah, but that's what I'm wondering, it's like Why don't you care about?
+
+SPEAKER 1
+Because it's violence and I don't care for violence. Good too is something I don't want. I don't care about good too. You care about good too.
+
+SPEAKER 2
+No, OK, but let's say in my utility function I'm
+
+SPEAKER 0
+LMS, yeah, for both goods, yeah.
+
+SPEAKER 1
+No, you're not saying monotonic when you say LMS for both goods, huh? What does it mean, LNS for both is monotonic. Yeah, monotonic. Yeah. If I'm monotonic, yes, and the price is zero, I will consume an infinite amount. Let me strictly monotonic, and let me remind you that I've told you already that that's a condition that Douglas faces. The Douglas is stric monoton everywhere except on the axis where it takes value zero everywhere and it's just weakly. So even with the Codagra. She's LMS. Price is 0. I don't consume necessarily an infinite amount of that good if my endowment is in the good in which the price is zero because I have no money. Like OK.
+
+SPEAKER 0
+So maybe I don't know because what, what I was
+
+SPEAKER 1
+LNS only tells you that the solution must be on the budget.
+
+SPEAKER 0
+Yeah, yeah, OK, but, but if we have, we're monopolically both goods and, and, uh, so I want to demand them infinitely much of the good that's zero price. Um, oftentimes in the solutions we get them infinite demand for that good and for the other good, uh, where I have some endowment, I will demand between 0, a correspondence between 0 and that. I don't get where you can, where you can compare an infinite, infinite utilities. How can we say that they're on the same indifference curve, you know what I mean. I, I agree that sometimes I have a tendency to
+
+SPEAKER 1
+work in a nonstandard analysis way when I work those solutions because all I should say is not defined and call it a day. You should have questioned me, how can something be equal to infinity, Francesco, to begin with, more than saying that, you know, you keep on consuming goods in fixed proportions even when you go off to infinity. Uh, But it's I have, uh, I was raised in this type of math where you can have infinities that are of different sizes and zero are of different sizes. You can do the same thing with sequences in real analysis. This beautiful extension of real analysis that is called non standard analysis where you take a different approach to solve the same problems and you have those numbers. So, some of the solution, it creeps in from my way of thinking. I apologise. I should just write notes that.
+
+SPEAKER 0
+OK, good. But, but I will, I will do like you say on the top. You shouldn't, you should do you.
+
+SPEAKER 1
+I mean, I, uh, I, I, I got this way for many years and that's how I am, but, you know, you're still young. You can do it. You will not be punished for any way of that. The point is that you know that when one of the demand is infinite, you will not have that is in equilibrium no matter how you write.
+
+SPEAKER 5
+Uh, let's go back to the address box and, uh, I have a question about that question, and related to this gentleman's question, and, uh, I'm wondering that, uh, what if the uh XA the allocation and just lies in uh the, the left side of the square and if, uh, so if it's so yeah. Uh, no, the, uh, the smaller, the smaller square. Oh yeah, yeah, yeah, yeah, yeah, uh, so, yeah, so should this be like a weekly Pareto efficient instead of a strict Preto efficient or?
+
+SPEAKER 1
+No, I can make both strictly better off. Think that I get, where is my blue? Think that I get my level curve here. Uh, then, uh, points that are, say, in this region. Make both of us strictly better off. You move in the box so you're happier. I move under my level curve, so I'm happier. So, that wouldn't, uh, fulfil that condition. Uh, Yeah, so I don't think in this problem, it makes a difference.
+
+SPEAKER 5
+Oh, OK. I thought, uh, actually I thought it would be, like, uh, moved downwards so that, uh, we can hold that.
+
+SPEAKER 1
+No, because you see I can increase the utility of both, which means that if I think about the utility space, you know, I'm still interior, so I can move up in both directions. So, I'm still interior. I'm not on a flat portion, you know. Remember that. These are the things. This is utility A, utility B. It's not for this example, it's some random drawing. You know, if I can increase both utilities, and this is what is feasible in terms of space, then I'm simply not Pareto efficient. Here, when I increase one weekly and the other strictly, it means that the, I can go here and here and that's fine. Here, you know, this would not be weakly para efficient because I can increase one guy without hurting the other guy. So it's really how I treat these flat portions, the difference, and I need flat portions, but this point is not on the boundary at all because I can improve the utility of both. So. Doesn't matter. OK, thank you, I understand. We don't worry too much about this stuff here. It tends not to be that important. And anyway, If you were to find all of this instead of just this, I would be super happy anyway anyway. Just to be clear, Yeah, I just have a question
+
+SPEAKER 6
+about like how can we or when should we underline the market clear has been sti uh satisfied because we we know that if we have or Into efficiency, but parto efficiency have to satisfy market clear. No, no, no, no, neither, but you know there are
+
+SPEAKER 1
+different conditions what you need. One monotonic. Tells you that in every Pareto efficient allocation, there is market clearing. One monotonic doesn't tell you that in any competitive equilibrium there is market clearing, and you have an example exactly here. This guy is strictly monotone. In all but efficient allocations, there is market clearing because you have that one monotone guy. But it's not true that in every competitive equilibrium we have market clearing. So one monotone. Is your vision to have market clearing inefficient allocation? But not in a competitive equilibrium, and this is the counter.
+
+SPEAKER 6
+OK, so when, what about like LNS? If we have LNS for both players and they maybe means they are monotonic and then we or monotonic. Uh, uh, both.
+
+SPEAKER 1
+Both, then you just say monotonic. Monotonic implies LMS, not vice versa.
+
+SPEAKER 6
+OK, I got it. Thank you.
+
+SPEAKER 1
+Yeah. So, one LNS is not enough in general for nothing of this sort. You know that you have virus low, but you don't have necessarily market clearing. You only know that the things that don't have market clearing are price zero in the competitive equilibrium. But think about the butterfly example. In the butterfly example, neither the competitive, all competitive equilibrium exhibited market clearing, nor er efficient allocation exhibited market clearing, and everyone was LNS. That's the point of the butterfly example is exactly the point that LNS and market clearing are very different conditions despite Barra's law. You see, these crazy examples, the bit I enjoy them because I enjoy them, but I also enjoy because every year you ask this question and the point of those examples, which by the way, are driven by the students' questions. Now I'm so experienced, I have no surprises, but when I was young and I was very surpriseable, you guys would come up with an interesting question. You guys would get that question for the exam. By the way, I still have that flare. It's just last year they gave me such a good GE question that, uh, it's your exam. So, you can, if you don't like the question, which I think is very nice, I can try and look up the name of the guy. I have an idea.
+
+SPEAKER 2
+It's OK.
+
+SPEAKER 1
+I, I, I even, I'm sure I can identify him because I know what he's from and we have very few students from that country. But yeah, so, you know, and this is you asking this question that gets me to sing and gets me to want to teach these differences through the example. So, yes, I feel it, but, you know, anyway, let's see about this here. I think he's better than me, that guy. That's if you like the G question, we think. You don't, I keep it to myself. Yeah. For example, from the lecture. Remember that example, we had a 10 by 10 box. A U B. And remember that the consumer A had a kink line that was going here. And Consumer B had a king incline. That was going here, so this is 55, 1010. OK. Now remember this guy was mean here. This guy was mean here. And so When I draw it, how did I draw the contract curve? I said, anything here. But that's a bit an imprecise way of drawing it because, you know, when I say everything here, I don't, I'm not resolving my feasibility marker clearing thing. So, I mean, we get a sense as to why these points are, but it efficient, say this allocation, you know, I have my Hola. This is a horrible line. OK, let's do it for this point. This is my level curve going through that point. This is the level curve throwing, going through this point, and I noticed that the upper contour set are in a sense split, if not at the boundary, so I must have efficiency. What? At that point. So, that is Pareto efficient. My only problem is that here I've placed XA and XB at this point, but I could have placed XB anywhere up here above XA, and it would have also been an equilibrium. OK, so what did I say? I said that I could have placed XB here and XA. All I need is that it's below. OK. So, how can I write this if I wanted to write it formally? I say, OK, let's do this portion here of the contract curve. I try to write the portion to the right of the heart of the butterfly, then we can write the other portion, otherwise we get confused in doing this. So I say, OK, I think I, I want to write this feasible allocation, so let's call it the Pareto efficiency, whatever, right, because it's just the right path. This is X, which is a subset of R4. Plus, and then what do I want? I want that in the first good we have market clearing X1A plus X1B is equal to 10. 2nd good, I want feasibility. X2 a plus x2b smaller equal than 10. OK, I'm not done, of course. I also need this thing that, you know, XB must live below the kink line. And that XA must live above the kink line. That's the last two things I need. So I want that XB is OK. This kink line was that, you will get them confused for sure, that XB1 is equal, uh. To 1/2 X2B. Yeah, agreed or wrong, you guys. And this line is at X2. And Is equal to 1/2 x 1A. Greed probably. Hopefully I didn't do a mistake. You can check me. And I need to be above this pink line, so X2A has to be greater than that. So, I need X2A to be greater or equal than 1/2 x 1A. And I need X2B to be smaller or equal than 2 x 1B. Done. So that's this portion of the contract curve. If I wanted the other portion PR, I would again, the first two conditions just say feasibility, so X belongs to uh R4. Plus, and I want that X1. Now, you know, I, I have market clearing on good too. Here we are flat, so I want that X1A plus X1B is smaller or equal than 10. I want that X2A plus X2B is exactly equal to 10. I need to be below the green line, so I need that X2A is smaller than or equal than 1/2 x1A, and I need to be above the blue line, so I need that X2B is greater or equal 2 X1B. Boom. So I just flip the inequalities. None Now, How good? Will I be At arguing this thing here will give me some points for sure, but if I understood the problem, this, I could have written irrespective of how good I was at solving the problem up here.
+
+SPEAKER 2
+You talk about how you like would show that.
+
+SPEAKER 0
+way OK.
+
+SPEAKER 1
+So, Yeah, contour sets, contour sets. So, basically, I would say, let me just redo that portion of the plot where I have this one goes down here and this one goes up here. So we just focus on that. And I say, OK, let me think about the easiest allocation. You know, I could do with the market clearing, but let's think that they stick to the kings. XB. And this is XA. How do I show that this is Pareto efficient? X is equals Xa. XB Is B since. The utility of A at X head A being greater than the utility at Xa implies that X 1A is bigger than X1A. OK, the only way I can be better off is if he consumes more of good 1. He needs to be to the right. And you do the same. The only way B can be better off. Weekly, whatever. is that he consumes at least as much. But You sum this and this becomes strictly greater than the sum of X1A and X1B, which is the omega 1A plus omega 1B by assumption, which is equal to 10. So I'm done. Showing that something is not Pareto efficient, so outside the butterfly not Pareto efficient, I just find a thing on the butterfly that makes them both better off.
+
+SPEAKER 0
+Quick follow up when you have a situation where you're trying to show this for. to a perfect But here, you know, they have to increase both to be better off. But you would have to separately show. Any of them either.
+
+SPEAKER 1
+Look, here, I had a clear direction of improvement that is going to the right. But in any other problem you give me, I will find a direction of improvement that points inside one upper contour set and that takes me out the other. So, you know, it's true here I had a flat direction. And that I may have to think about several directions. But actually, here, I was very constrained in the direction, whereas there, I may be more free. So, it's actually maybe easier. It's easier on one side, harder on the other side. Yeah. But for the, that's how you do it. More. And that, when you're saying go great.
+
+SPEAKER 0
+You would need to go Northeast, right, to improve A, because if you just go right, you're still going to be just on there.
+
+SPEAKER 1
+Yeah, yeah. Yeah. You're right. You're right. I mean, I was doing it for a point up here, but you're right that I should take it a bit higher. Anyway, you see, the only way to increase what I wrote here is correct because the only way to increase is I give you more of good one. I would also have you give you more of good 2 to increase. That I don't care about because I will get the contradiction from good one. Yeah. So, that's why, you know, you're correct, but you didn't have to show that.
+
+SPEAKER 0
+the There should be a new combination of X1 X.
+
+SPEAKER 1
+Yeah, here what I'm saying is think about this new allocation. It's bigger, bigger than, it's not feasible. It's not feasible because, you know, this was, uh, you know, in market one here we were consuming all of good one. Yeah, OK. And so, you know, here I had market clearing here we are doing more, so it's not feasible. So I'm saying, you know, being both, one in the strict upper contour set and the other one in the weak upper contour set violates feasibility because these two sets have an empty intersection. Ultimately, I'm trying to show that the strict upper contour set of one person and the weak upper contour set of the other person have an empty intersection. If I can show that that point is a very efficient point, if instead, The street of one has a non-empty intersection with the weak of the other one, then that point is not efficient. So you're intersecting two sets, these two upper contour sets, 11 week. Give the straight to the guy you prefer the weak to the other guy.
+
+SPEAKER 0
+in the exam and we could also just argue it,
+
+SPEAKER 1
+better than nothing. When I tell you that that's the modal answer I get and it's not even well argued, yes, for example,
+
+SPEAKER 0
+every point in the butterfly can't go for one.
+
+SPEAKER 1
+Yes, because, but look, you know, this is all I'm looking for to show that the butterfly works. Yeah. So this. Is all you would need to read and then you say my symmetry, the other case. Yeah. So, you know, agreed, it's not obvious when you don't know how to do it, but for me, who know how to do it, to write this doesn't take time, huh? Then to show that something else is not Pareto efficient, you know, there, you know, you do your butterfly thing. You have your butterfly here, whatever. Now I'll do a terrible plot and you say, oh, OK, let's think if this can be Pareto efficient. Could it be? Well, not really, because the upper contour set of this guy is here. The upper contour set of the other guy is here, so I can find the big box where both are better off done. I mean, unless you are in the butterfly, there is always a box in the intersection of the upper contour cells, and so that cannot be very efficient. Said in other words, the only upper contour sets I can have measured zero intersection live in the butterfly. Do we need like really to draw like this one. Look, if I ask you. Find me a very efficient allocation. No. If you want to argue that these are all and only the Pareto efficient allocation, then you should do it. Again. More details and more points, but you know, not 0 or 100, you know, you start by showing what you can and then then if you have time, you do. If you don't have time, you do less.
+
+SPEAKER 2
+Is that Mhm.
+
+SPEAKER 0
+Like, like they had like only one point where they cannot feel like better off except at that one point.
+
+SPEAKER 1
+2 boxes, boxes, yeah. So the equilibrium in that case would be just. The allocation, yes. You have, uh, many, many price factors. OK. Yeah, equilibrium is an allocation and a price vector. If you think about an example like that. I mean, let's do it with circles so that we get a little bit of thrill. Think that the level curve of A are circles around that point, the level curves of B are circles around this point. And think that. I get an endowment here. Then, of course, there is a competitive equilibrium where I have XA here, XB here, and that's it. And I have it. It's feasible because B is northeast of A. Are these the only type of equilibrium for all endowments? No. No. Thing that I give you an endowment down here, omega bam. X A XB stays here. Feasibility. Everyone optimises jolly days. Competitive. Not parental fees. First welfare theorem fails, of course. Think about the crazier example. Well, the bliss point of B. Let's call it bliss. No, let's not call it anything, but let's think about the bliss point of B being down here and the bliss point of A being up here. Can I have a competitive equilibrium where they're both on the bliss points? No is the right answer. If you, Ah, look, you will tell me, Francesco.
+
+SPEAKER 0
+See, look.
+
+SPEAKER 1
+OK. That's your budget line. I maximise within my budget. You maximise within your budget. And what did you forget? Bra If this is XA and this is XB, then X1, sorry, X2A plus X2B, which is this length plus this length is larger than the height of the box, so it's larger than omega 2A plus omega 2B. So actually, when the bliss point is not, one bliss point is not northeast of the other bliss point. We cannot have both guys on the list. The main thing we should address. Remember, feasibility always. Means that if XA is here, XB must be here. OK. That's the way you think about feasibility. I fix one and the other must be top right. So, I immediately saw in this down example that if I was fixing A to the bliss, B had to be in this box here, and so he couldn't be at the bliss. When I'm telling you that I don't do the algebra when I solve those boxes, I mean it. The algebra is the last step also because it's where I do the mistakes for real. So if I start with the algebra, I will start with the mistakes and bring them everywhere because being old makes you more mistakes prone, not less. So I try to avoid those situations as much as I can. Yes. uh. Exactly. With the answer, the happier I am. If you have time just for the drawing, you do the drawing. If you have more time and you're done for the drawing, you don't spend time thinking about an art exposition or a good book you want to read. You try and do that. And her and then you Isaac?
+
+SPEAKER 0
+With There must be very efficient allocations.
+
+SPEAKER 1
+They're just not all of them getting on the list. So, you know. Let's think about it. There must be very efficient allocation. Look, think about the two circles. So do a large, large circle here, boom, XA equals 2 XB here, ha, hat. That's Pareto efficient. So, actually, there will be a line, I think a straight line, but I cannot guarantee you connecting bliss point to bliss point, and there will be an envelope. Notice this, you can solve through the Pareto problem. Everything is differentiable. You don't have second order condition, but it's fine. Uh, and there will be a path bliss point to bliss point, possibly linear. I don't want to bet on that. Um, that takes you from one to the other, and this will be the contact. It's just MRS equalisation is. Just it has sloped, so it's not a great, you couldn't split this using a price. Yeah, Oh, we have your Sorry?
+
+SPEAKER 2
+You have Not really, because we are doing lots today.
+
+SPEAKER 1
+If you're, actually, tomorrow, no. If you, because I have lots of stuff going on. If you're super keen on a Friday thing, uh, you know, we can find some time. But tomorrow, no, because I am packed with other things. Can I ask a question? Yeah. I still have, can stay half an hour if you are keen, guys, you know, it depends on how keen you are.
+
+SPEAKER 2
+How to become such a good economist.
+
+SPEAKER 0
+took a death one. Profession. I know.
+
+SPEAKER 1
+Like a professor. Look, you need to like math, like thinking. Try to, when you, if you ever become academics, try to say what the model actually says and try to think about what the model actually says. I was at the MSC party, you know, I was talking to an EME student, and they should be super intelligent. They are, but man oh man, he didn't even know what a utility function is. He comes to me and he says, you really think that people maximise? You don't maximise. You never max you can turn it off. You never maximise. So at least, you know, I criticise economic theory a lot. I like it a lot because I think it's pure, but, you know, we have to also accept that, you know, we are true to our assumption. But When you criticise the theory, when you think about it, at least criticise it for the right reasons. Try to give it the benefit of the doubt and try to learn and that's it. Then, you know, if you stay in the business and love what you do, You will learn a lot. And you know, for me, it's been the best adventure of my life with the kids. But, you know. You do you, but, you know, if you have passion for something, if you live with intent, I think no matter what you do, you guys are super bright. You will do it. You will become much better than I am, you know, I have a lot of other problems. I don't like to send out papers unless they're perfect, so try not to do that. Um, perfectionism, it will kill you. So, you know, a bit of my obsessive compulsive with understanding all the weird cases is that. Good thing and a handicap at the same time, so appreciate how you are. We're all a bit different and you can do you and it can work better for you than how I am for myself. If I can give you a word of personal advice, try to be kind, try to learn. Try to support people that are behind you. Those in front of you don't need your support. So that's it. But, you know, I do me, you do you. We're all different and it's beautiful because of.
+
+SPEAKER 2
+Touching.
+
+SPEAKER 1
+Look, I want both in dynamic games, I want you to be able to solve also for Nash equilibrium, not just for backward induction and subgame perfect. I remember how we did that was that we converted the game into the strategic form and then that solve for the Nash equilibrium of that. So I would like you to remember both ways of solving a dynamic game, yes. I mean, look, repeated games, I've already sell out by a vast extent. I would recommend watching the recording because I don't want to sell out more than I have already done. So watch what I've said about repeated games. If you have doubts about the interpretation, ask colleagues because I think I was very transparent about how to prepare for repeated games.
+
+SPEAKER 0
+But sorry, maybe now I'm pushing you too much, but just to continue from that, like, do you think that that we get good practise from practising the canonical games that you taught us, or no, we should just All exams of these things like Do we get something out of like mastering the canonical games.
+
+SPEAKER 1
+Definitely, and definitely you should do the extra programmes and last year exam. So, these are just other cases to practise, you know, the one we did in lecture is good, more. I had a question here. No? Yeah. No. It can be Um-hum. Yes, we can. I'm just thinking, you see, that's when I solve the problem. I don't say nothing. I need to flat, let's think that I want to keep this point in the competitive equilibrium. So I want a competitive equilibrium where it is in the bliss. One option is to just shove them both outside the bliss. But then I will have problems. Because my budget constraint will cut through the upper contour set of both guys. So I have a real problem. I may have a problem of equilibrium existence here, I must tell you. The alternative could be let's pass one on the bliss. OK. And then, um, you know, the problem is that I need B. I cannot, if I go down, B will consume down there and I will have problems. So I say to myself, let me do it flat, OK? At least if I do it flat. B will not be able to consume this amount and I will get feasibility. So let me put XA onto this. Draw a flat zero price budget constraint where A will be happy to choose its list. B will maximise the dangerency point because it's circular, and I will have market clearing in good 2, feasibility in good 1, done. So, I think about, this will be the types that will be vertical ones too here. A vertical one here, a flat one here, nothing with positive prices because you got the level curves. I'm there. I draw these level curves and I do with my hand the badge. I said, I really do this all the time. I solve the problem. I know maybe you think it's idiotic, but, you know, I got the conjecture doing this and having done many, but, you know, Yeah. So, try it, but, you know, this, you know, it wasn't easy. I wasn't seeing it immediately, but, you know. Then you see Thank you. My pleasure. Look, blessed, we see us for the, if you want Friday, half an hour, 40 minutes, we can do, it's on you to write to me. It's on you? Otherwise, Could the student right because they never let me know, know when is your exam, so I set your office hours. Anyway, I, I try to find out with Kelly otherwise I do everything. No. What, when is the, did they at least tell you when the timetable is coming? Yeah, I think, uh, Friday, then I, that's fine.
+
+SPEAKER 0
+Thank you so much.
+
+SPEAKER 1
+If you let me know, it's great because, you know, at least you can also let me know what would you prefer for the office hour. If it's remote, I can be quite flexible in terms of timing. If it's here, it's from the, well, on the web. Thank you guys. Thank you. Enjoy, but we'll see each other again over the academic year. Keep relaxed. Don't overstudy. Don't burn out. Don't burn out. Don't burn out, OK?
+
+SPEAKER 0
+Now A stomato notes.
+
+SPEAKER 1
+You had one more question and tell me.
+
+SPEAKER 2
+Yeah, I, I couldn't, I couldn't uniqueness finding the equilibria
+
+SPEAKER 1
+is easy, you know.
+
+SPEAKER 0
+So I think if I can like and like and
+
+SPEAKER 1
+then it's easy, but what's the question? Can I see the statement of the question.
+
+SPEAKER 0
+Go on. OK.
+
+SPEAKER 1
+So, finding them all, it's, I understand that finding them all is hard. So that's what this is hard about, but finding, uh, one shouldn't be hard. So how did you go about doing it?
+
+SPEAKER 0
+Oh.
+
+SPEAKER 1
+So, what did you do?
+
+SPEAKER 0
+Yeah, so what, what's your issue, you know, here, you
+
+SPEAKER 1
+know, yeah, so I think yeah. Look, you know, if arguing that there is all that all equilibria have that type is difficult, but you know what you should do if you are a student, you know, is to argue that think about Q Q Q 1 minus 3Q, you know, and check for which value of Q, if any, you are indifferent between playing 123, and J. OK? If you find the value of two that makes you indifferent, then you found the cymatic equilibrium. Yeah. I think it's, it's. Yeah. And it's harder to show that this is the only thing.
+
+SPEAKER 2
+So, in the exam. I'm not right.
+
+SPEAKER 1
+This was a COVID question, by the way, when they had 24 hours. In the actual exam, you start by this. Um-hum. And then, you know, if you want to do something more, you say, OK, let's think that you play Q1 here and here Q and Q the same. So, this is -2 q minus Q1 and let me find the contradiction.
+
+SPEAKER 2
+OK? So I symmetric. Yeah. And then I, you know.
+
+SPEAKER 1
+And look, at least finding all the symmetric equilibrium, you can do this way. Oh my. Finding a symmet, Metric is harder and they had 24 hours to do this. So, I think it was fair and they did it in groups. But nevertheless, arguing uniqueness, you know, if you read the proof here, it's careful and it does it, it's very hard to come up with that. So, they were getting a lot of points for finding the mixed equilibrium, and then, you know, this, you know, you had 24 hours enjoying. And they were working it in teams. It was not allowed, but I knew they were doing it in teams of 5. So it was 120 for uh 5 hours of human labour for an exam. I think it was fair, but I, I know that, look, finding the symmetric equilibrium would have been doable, easy, even me going for the rest, you know, would have required in an exam quite something. OK. But, you know, there are things you could have done, you know, you could have done. Things that I mix between 10 here, 12 here, and here 1 minus 2. Am I indifferent between the three or not? If not, this is not an equilibrium. So, things like that. Or am I indifferent, if I'm mixing between these three and these three, am I indifferent between these three or is it better to go here? So, You literally have to do. There is a way to do it mechanically, which is think about all the supports you could mix on. These are, you know, for player one, you have the power set of 4, so you could mix over 4, over all 4 options, which is one way, or you could mix about subsets of 3, how many you have, you have 4 of these subsets. Of 3 plus you have how many subset pairs of 2 you have uh um 223, well, you have, I think 8. Anyway, you compute all the possible subsets of strategies. So you do the power set of the action set of player 1 that an element identifies what you're mixing on. You have a power set of Action. This is the set of supports for your mixed strategy, and for each of these supports all you get is a system of equalities and inequalities with equalities you solve the. You check the inequalities. If everything is satisfied, that's an equilibrium. And once you've checked all the supports, you've found everything. What that argument is clever about is cutting a bunch of supports in a small amount of time. That's it. Thank you. No problem. Now I have to go because I think I have a meeting at 3:30. Yeah, you have 15 minutes. You're right. OK. No, I'm good. Sure. I'm good.
+
+SPEAKER 0
+OK.
+
+SPEAKER 1
+Anyway, Let's see. Let's see if the TA is right, but I really think they are. That doesn't mean that you should slack because, you know, if you offset my goodwill, I will be sad. I put effort in. You know, though, how, how nice can, how much can
+
+SPEAKER 0
+be nice really save an exam where the average points is always in the 50 range?
+
+SPEAKER 1
+No, it's 61, the average points. Adjustment.
+
+SPEAKER 2
+Yeah.
+
+SPEAKER 1
+It's 61. OK. 61? Whether I need adjustment or not is something to be debated, but, you know, the average is always the same. Right. And the adjustment is not yours, it's mine. You also need to understand that it's hard to write an exam where everyone needs to get to within 20 points of each other because it's just crazy. You know, I have 100 points, but I'm supposed to place 80% of the distribution within 25 points. Yeah. You know, if you think about a random process, it's a very unlikely thing, that thing, unless I give you 20 points for telling me your name and I give you 20 impossible points. So, yeah, it's a bit weird that, you know, we are expected to use so little of the price range, of the marking range. Why is that? Because they're English.
+
+SPEAKER 0
+It's tradition.
+
+SPEAKER 1
+Look, you, you're Italian, but I'm surprised that an Italian person can be surprised. You, you know, I, I, I never gave you more than you.
+
+SPEAKER 2
+No, no.
+
+SPEAKER 0
+I, I know more, but I thought it was stupid. Why do you have a scale of 10 if you only use 9?
+
+SPEAKER 2
+Like, it's I mean, in my time it was really
+
+SPEAKER 1
+very hard getting outside 4 to 8. So, 4, you were trash, 8, you were great. 9 was really, you know, like. No, at 9. Now they're in my high school, they would fail half of the court. It was super competitive every year. I did the classical high school. Yeah, me too, me too. The career. I, I'm from Turin, but I did. Yeah, so I did all Latin and all Greek because I sucked in Italian and humanity, so I pushed on my weaknesses.
+
+SPEAKER 2
+I, I. Because nowadays people choose that school because they suck in math, but I guess you didn't suck in math.
+
+SPEAKER 1
+No, actually, it was very natural in math, so, We thought I would always pick up the math, whereas, you know, writing well, I still am not great, but, you know, at least I worked on that. It was a bit of an old fashioned view where you want to become a full person rather than a deep person. Now modern society pushes you to that, no, right? but Valley, it's been very fun, really. Oh, tell your guys to do the evaluations. We are still down at 30. I mean, I don't want to nag Bravi bravi Margo. I cro nava loo lanote. Look. Gerlapo. So guys.

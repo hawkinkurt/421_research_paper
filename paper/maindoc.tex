@@ -1,0 +1,72 @@
+\documentclass[11pt]{article}
+
+% Load your style template
+\input{papertemplate.sty} 
+
+\begin{document}
+
+\title{Modelling International Film Production Services Exports}
+\author{Kurt Hawkins\thanks{London School of Economics. Contact: k.m.hawkins@lse.ac.uk}}
+\date{January 2026}
+\maketitle
+
+\begin{abstract}
+This paper develops and tests a gravity model of international film production services exports. Using a panel dataset of 45,000 films released globally since 1995, I construct country-pair trade flows by identifying the headquarters of production companies as importing countries and production locations as exporting countries. I evaluate whether standard gravity variables explain film production patterns and examine additional factors including shared borders, common language, and national film incentive schemes. Where data permits, I employ difference-in-differences analysis to assess the causal effect of national policies designed to attract international productions.
+\end{abstract}
+
+\section{Introduction}
+
+% TODO: Expand introduction with broader context about creative industries trade
+
+This paper explores three related research questions. First, how well does a gravity model capture international film production flows? Second, what factors dictate these flows? Third, how effective are national policies at attracting international productions?
+
+The research makes two intended contributions. First, I provide and test a gravity model of international film production flows. While gravity models have been shown to explain global services exports broadly, they have not been applied to film production services specifically. Testing whether these models capture film production patterns will illuminate the drivers behind international production decisions.
+
+Second, I attempt to gauge the effectiveness of national policies designed to attract international film productions. Establishing a causal relationship between incentive schemes and increased production activity would strengthen the case for countries to implement or expand such programmes.
+
+\section{Literature Review}
+
+% TODO: Expand with additional sources on gravity models, services trade, and creative industries
+
+The gravity model has become a workhorse of international trade empirics since its theoretical foundations were established by \citet{Anderson1979} and refined by \citet{AndersonVanWincoop2003}. While originally applied to goods trade, subsequent work has extended the framework to services.
+
+\citet{KimuraLee2006} estimate a gravity model for global services exports, finding that distance, economic size, and institutional factors significantly predict bilateral services flows. Their methodology provides the foundation for my approach to film production services.
+
+\section{Data}
+
+I utilise a panel dataset of approximately 45,000 movies released globally since 1995. The dataset includes release dates, production budgets, the companies involved in production, and the countries participating in each film's production.
+
+To construct bilateral trade flows, I identify the headquarter country of the primary production company as the importing country and other countries involved in production as exporting countries. This approach treats film production services as flowing from production locations to the country where the commissioning company is based.
+
+For policy analysis, I draw on the Global Incentives Index 2025 produced by Olsberg SPI, an international creative industries consultancy. This index catalogues national film production incentive schemes across countries.
+
+\section{Methodology}
+
+\subsection{Gravity Model Specification}
+
+Following \citet{KimuraLee2006}, I estimate a gravity equation of the form:
+\begin{equation}
+\ln X_{ij} = \beta_0 + \beta_1 \ln GDP_i + \beta_2 \ln GDP_j + \beta_3 \ln D_{ij} + \gamma' Z_{ij} + \varepsilon_{ij}
+\end{equation}
+where $X_{ij}$ represents film production services exports from country $i$ to country $j$, $GDP_i$ and $GDP_j$ are the economic sizes of the exporting and importing countries, $D_{ij}$ is bilateral distance, and $Z_{ij}$ is a vector of additional controls.
+
+The vector $Z_{ij}$ includes dummy variables for country pairs that share a land border, share a common language, and whether the exporting country operates a film production incentive scheme.
+
+\subsection{Policy Evaluation}
+
+To assess the causal effect of national film incentives, I face potential endogeneity: countries may introduce incentive schemes in response to existing production activity rather than vice versa. In the absence of suitable instrumental variables, I pursue two complementary strategies.
+
+First, I implement a difference-in-differences design comparing countries that introduce incentive schemes to similar countries that do not. Second, I examine whether consistent evidence exists of increased activity following policy introduction in countries with minimal prior international production---where reverse causality is less plausible.
+
+\section{Expected Results}
+
+% TODO: Complete after empirical analysis
+
+\section{Conclusion}
+
+% TODO: Complete after empirical analysis
+
+\bibliography{references}
+\bibliographystyle{aer}
+
+\end{document}

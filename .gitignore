@@ -1,0 +1,9 @@
+# Large data files
+data/raw/
+data/processed/
+*.csv
+*.xlsx
+*.parquet
+
+# Keep code and small config files tracked
+!data/.gitkeep
