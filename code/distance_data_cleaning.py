@@ -1,21 +1,36 @@
-"""distance_data_cleaning.py"""
+"""gravity_cepii_cleaning.py"""
 import pandas as pd
 import numpy as np
 import pycountry
 
-# Load the CEPII distance data
-df = pd.read_excel("C:/Users/kurtl/PycharmProjects/gravity_model/data/raw/dist_cepii.xls")
+# =============================================================================
+# LOAD DATA (only columns we need to reduce memory)
+# =============================================================================
 
-# Replace '.' with NaN so pandas treats it as missing
-df['distw'] = df['distw'].replace('.', np.nan)
-df['distwces'] = df['distwces'].replace('.', np.nan)
+cols_to_keep = [
+    'year', 'iso3_o', 'iso3_d',
+    'dist', 'distcap', 'contig',
+    'comlang_off', 'comlang_ethno',
+    'col45', 'col_dep_ever',
+    'comrelig',
+    'fta_wto', 'rta_type',
+    'eu_o', 'eu_d',
+    'wto_o', 'wto_d'
+]
 
-# Convert to numeric
-df['distw'] = pd.to_numeric(df['distw'])
-df['distwces'] = pd.to_numeric(df['distwces'])
+print("Loading CEPII Gravity dataset (this may take a moment)...")
+df = pd.read_csv(
+    "C:/Users/kurtl/PycharmProjects/gravity_model/data/raw/Gravity_V202211.csv",
+    usecols=cols_to_keep
+)
+print(f"Loaded: {len(df):,} observations")
 
-# Check how many rows have missing weighted distance
-print(f"Missing distw values: {df['distw'].isnull().sum()}")
+# =============================================================================
+# FILTER TO RELEVANT YEARS (1990-2018)
+# =============================================================================
+
+df = df[(df['year'] >= 1990) & (df['year'] <= 2018)]
+print(f"After filtering to 1990-2018: {len(df):,} observations")
 
 # =============================================================================
 # CONVERT ISO3 TO ISO2
@@ -27,60 +42,111 @@ manual_iso3_mappings = {
     'ZAR': 'CD',  # Zaire → DR Congo
     'TMP': 'TL',  # East Timor (old code)
     'PAL': 'PS',  # Palestine
-    'YUG': 'RS',  # Yugoslavia → Serbia (largest successor)
-    'ANT': 'CW',  # Netherlands Antilles → Curaçao (largest successor)
+    'YUG': 'RS',  # Yugoslavia → Serbia
+    'ANT': 'CW',  # Netherlands Antilles → Curaçao
     'SCG': 'RS',  # Serbia and Montenegro → Serbia
 }
 
 def iso3_to_iso2(iso3_code):
-    # Check manual mappings first
+    if pd.isna(iso3_code):
+        return None
     if iso3_code in manual_iso3_mappings:
         return manual_iso3_mappings[iso3_code]
-    # Fall back to pycountry
     try:
         country = pycountry.countries.get(alpha_3=iso3_code)
-        return country.alpha_2
+        if country:
+            return country.alpha_2
+        return None
     except:
         return None
 
-# Apply conversion to both origin and destination
-df['iso_o_2'] = df['iso_o'].apply(iso3_to_iso2)
-df['iso_d_2'] = df['iso_d'].apply(iso3_to_iso2)
+print("\nConverting ISO3 to ISO2 codes...")
+df['iso_o'] = df['iso3_o'].apply(iso3_to_iso2)
+df['iso_d'] = df['iso3_d'].apply(iso3_to_iso2)
 
-# Check results
-matched_o = df['iso_o_2'].notna().sum()
-unmatched_o = df['iso_o_2'].isna().sum()
+# Check conversion results
+matched = df['iso_o'].notna().sum()
+total = len(df)
+print(f"Origin conversion: {matched:,} / {total:,} ({matched/total*100:.1f}%)")
 
-print(f"\n=== ISO Conversion Results ===")
-print(f"Origin matched: {matched_o}, unmatched: {unmatched_o}")
+# Show failed conversions
+failed_o = df[df['iso_o'].isna()]['iso3_o'].unique()
+if len(failed_o) > 0:
+    print(f"Failed origin codes ({len(failed_o)}): {failed_o[:20].tolist()}")
 
-# Show unmatched codes
-if unmatched_o > 0:
-    unmatched_codes = df[df['iso_o_2'].isna()]['iso_o'].unique()
-    print(f"Unmatched origin codes ({len(unmatched_codes)}): {unmatched_codes[:20].tolist()}")
-
-# Overwrite original columns with ISO2 codes
-df['iso_o'] = df['iso_o_2']
-df['iso_d'] = df['iso_d_2']
-df = df.drop(columns=['iso_o_2', 'iso_d_2'])
-
-# Drop rows where either code couldn't be converted
+# Drop rows where conversion failed
 df = df.dropna(subset=['iso_o', 'iso_d'])
+print(f"After dropping failed conversions: {len(df):,} observations")
 
 # =============================================================================
-# CREATE LOG DISTANCE
+# CREATE DERIVED VARIABLES
 # =============================================================================
 
+# Log distance
 df['log_dist'] = np.log(df['dist'])
 
-# Check the result
-print(f"\n=== Final Dataset ===")
-print(f"Observations: {len(df)}")
-print(f"Sample iso_o codes: {df['iso_o'].unique()[:10].tolist()}")
-print(df.head())
-print(df.dtypes)
+# RTA dummy (1 if any FTA/RTA exists)
+df['rta'] = (df['fta_wto'] == 1).astype(int)
 
-# Save cleaned data
-df.to_csv("C:/Users/kurtl/PycharmProjects/gravity_model/data/processed/distance_cleaned.csv", index=False)
+# Both countries in EU
+df['both_eu'] = ((df['eu_o'] == 1) & (df['eu_d'] == 1)).astype(int)
 
-print("\nCleaned data saved")
+# Both countries in WTO
+df['both_wto'] = ((df['wto_o'] == 1) & (df['wto_d'] == 1)).astype(int)
+
+# =============================================================================
+# SELECT AND RENAME FINAL COLUMNS
+# =============================================================================
+
+df_final = df[[
+    'year', 'iso_o', 'iso_d',
+    'dist', 'distcap', 'log_dist',
+    'contig', 'comlang_off', 'comlang_ethno',
+    'col45', 'col_dep_ever', 'comrelig',
+    'rta', 'both_eu', 'both_wto'
+]].copy()
+
+# =============================================================================
+# DEDUPLICATE: Keep row with most complete data for each country-pair-year
+# =============================================================================
+
+print("\n=== Deduplicating ===")
+print(f"Before deduplication: {len(df_final):,} observations")
+
+# Count non-missing values per row for key variables
+df_final['completeness'] = df_final[['dist', 'contig', 'comlang_off', 'rta']].notna().sum(axis=1)
+
+# Sort by completeness (descending) and keep first occurrence
+df_final = df_final.sort_values('completeness', ascending=False)
+df_final = df_final.drop_duplicates(subset=['iso_o', 'iso_d', 'year'], keep='first')
+df_final = df_final.drop(columns=['completeness'])
+
+print(f"After deduplication: {len(df_final):,} observations")
+
+# =============================================================================
+# SUMMARY STATISTICS
+# =============================================================================
+
+print("\n=== Final Dataset Summary ===")
+print(f"Observations: {len(df_final):,}")
+print(f"Unique origin countries: {df_final['iso_o'].nunique()}")
+print(f"Unique destination countries: {df_final['iso_d'].nunique()}")
+print(f"Year range: {df_final['year'].min()} - {df_final['year'].max()}")
+
+print("\n=== Variable Coverage ===")
+for col in ['dist', 'contig', 'comlang_off', 'rta', 'comrelig']:
+    non_missing = df_final[col].notna().sum()
+    print(f"{col}: {non_missing:,} non-missing ({non_missing/len(df_final)*100:.1f}%)")
+
+print("\n=== RTA Distribution ===")
+print(df_final['rta'].value_counts())
+
+# =============================================================================
+# SAVE
+# =============================================================================
+
+df_final.to_csv(
+    "C:/Users/kurtl/PycharmProjects/gravity_model/data/processed/gravity_vars_cepii.csv",
+    index=False
+)
+print("\n=== Saved to gravity_vars_cepii.csv ===")
