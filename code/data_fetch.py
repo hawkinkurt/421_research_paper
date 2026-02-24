@@ -1,4 +1,6 @@
 """data_fetch.py"""
+"""Fetching GDP, CPI, and movie data via APIs"""
+
 import os
 import wbdata
 import kagglehub

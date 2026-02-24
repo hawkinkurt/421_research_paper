@@ -1,4 +1,6 @@
 """calculate_remoteness.py"""
+"""Calculating remoteness variables"""
+
 import pandas as pd
 import numpy as np
 
@@ -16,6 +18,19 @@ print("=== Data Loaded ===")
 print(f"GDP observations: {len(df_gdp)}")
 print(f"Gravity observations: {len(df_grav)}")
 
+# Remove invalid country codes from GDP data
+gdp_before = len(df_gdp)
+df_gdp = df_gdp[df_gdp['iso2'].notna() & (df_gdp['iso2'] != '')]
+
+# Get valid countries from distance data
+valid_countries = set(df_grav['iso_o'].unique()) | set(df_grav['iso_d'].unique())
+df_gdp = df_gdp[df_gdp['iso2'].isin(valid_countries)]
+
+gdp_dropped = gdp_before - len(df_gdp)
+if gdp_dropped > 0:
+    print(f"Dropped {gdp_dropped} GDP observations (invalid/missing country codes)")
+print(f"GDP observations after filtering: {len(df_gdp)}")
+
 # =============================================================================
 # GET UNIQUE DISTANCE PAIRS (distance doesn't vary by year)
 # =============================================================================
@@ -23,6 +38,12 @@ print(f"Gravity observations: {len(df_grav)}")
 # Take one year's distance data (they're the same across years)
 df_dist = df_grav[df_grav['year'] == 2000][['iso_o', 'iso_d', 'dist']].copy()
 df_dist = df_dist.dropna(subset=['dist'])
+
+# Remove any self-pairs (country paired with itself)
+self_pairs_count = (df_dist['iso_o'] == df_dist['iso_d']).sum()
+if self_pairs_count > 0:
+    print(f"Removing {self_pairs_count} self-pairs from distance data")
+    df_dist = df_dist[df_dist['iso_o'] != df_dist['iso_d']]
 
 print(f"Unique country pairs with distance: {len(df_dist)}")
 
@@ -49,6 +70,7 @@ country_years = df_gdp[['iso2', 'year']].drop_duplicates()
 country_years = country_years[(country_years['year'] >= 1990) & (country_years['year'] <= 2018)]
 
 remoteness_list = []
+countries_missing_distance = set()
 
 # Get unique years
 years = sorted(country_years['year'].unique())
@@ -87,8 +109,10 @@ for year in years:
                 remoteness = np.log(1 / weighted_sum)
             else:
                 remoteness = np.nan
+                countries_missing_distance.add(country_i)
         else:
             remoteness = np.nan
+            countries_missing_distance.add(country_i)
 
         remoteness_list.append({
             'year': year,
@@ -109,6 +133,11 @@ print("\n=== Remoteness Summary ===")
 print(f"Total observations: {len(df_remoteness)}")
 print(f"Missing values: {df_remoteness['remoteness'].isna().sum()}")
 print(f"Unique countries: {df_remoteness['country'].nunique()}")
+
+# Report countries with missing remoteness
+if countries_missing_distance:
+    print(f"\n=== Countries with Missing Remoteness ({len(countries_missing_distance)}) ===")
+    print(sorted(countries_missing_distance))
 
 print("\n=== Remoteness Statistics ===")
 print(df_remoteness['remoteness'].describe())

@@ -1,26 +1,25 @@
 """gdp_data_cleaning.py"""
+"""Cleaning GDP data"""
+
 import pandas as pd
 import numpy as np
 import pycountry
 
-# Read World Bank GDP data
+# =============================================================================
+# LOAD DATA
+# =============================================================================
+
 df = pd.read_csv("C:/Users/kurtl/PycharmProjects/gravity_model/data/raw/world_bank_gdp.csv")
 
-# Explore data
-print(df.head())
-print(df.shape)
-print(df.dtypes)
-
-# Check for missing values
-print(df.isnull().sum())
-
-# Check for zero/negative GDP values
+print("=== Data Loaded ===")
+print(f"Observations: {len(df)}")
+print(f"Missing GDP values: {df['gdp'].isnull().sum()}")
 print(f"Zero or negative GDP values: {(df['gdp'] <= 0).sum()}")
 
-# Find regional aggregates
-print(df['country'].unique()[:30])
+# =============================================================================
+# REMOVE REGIONAL AGGREGATES
+# =============================================================================
 
-# List of regional aggregates to remove
 aggregates = [
     'Africa Eastern and Southern', 'Africa Western and Central', 'Arab World',
     'Caribbean small states', 'Central Europe and the Baltics',
@@ -50,16 +49,20 @@ aggregates = [
     'Middle East, North Africa, Afghanistan & Pakistan (IDA & IBRD)'
 ]
 
-# Keep rows where country is not in the aggregates list
 df = df[~df['country'].isin(aggregates)]
+print(f"\nAfter removing aggregates: {len(df)} rows, {df['country'].nunique()} countries")
 
-print(f"Rows remaining: {len(df)}")
-print(f"Countries remaining: {df['country'].nunique()}")
+# =============================================================================
+# DROP MISSING GDP
+# =============================================================================
 
-# Drop missing GDP rows
 df = df.dropna(subset=['gdp'])
+print(f"After dropping missing GDP: {len(df)} rows")
 
-# Manual mappings for World Bank names that pycountry can't match
+# =============================================================================
+# CONVERT COUNTRY NAMES TO ISO2
+# =============================================================================
+
 manual_mappings = {
     'Korea, Rep.': 'KR',
     "Korea, Dem. People's Rep.": 'KP',
@@ -87,47 +90,63 @@ manual_mappings = {
 }
 
 def get_iso2(country_name):
-    # Check manual mappings first
     if country_name in manual_mappings:
         return manual_mappings[country_name]
-    # Fall back to pycountry
     try:
         country = pycountry.countries.search_fuzzy(country_name)[0]
         return country.alpha_2
     except:
         return None
 
-# Apply conversion
 df['iso2'] = df['country'].apply(get_iso2)
 
-# Check results (before dropping the column)
 matched = df['iso2'].notna().sum()
 unmatched = df['iso2'].isna().sum()
 
-print(f"\n=== Conversion Results ===")
+print(f"\n=== ISO Conversion Results ===")
 print(f"Matched: {matched} observations")
 print(f"Unmatched: {unmatched} observations")
 
-# Show unmatched countries
 if unmatched > 0:
     unmatched_countries = df[df['iso2'].isna()]['country'].unique()
     print(f"\nUnmatched country names ({len(unmatched_countries)}):")
     for c in unmatched_countries:
         print(f"  - {c}")
 
-# Overwrite country names with ISO2 codes and drop the iso2 column
 df['country'] = df['iso2']
 df = df.drop(columns=['iso2'])
 df = df.dropna(subset=['country'])
 
-# Create log GDP variable
+# =============================================================================
+# DEDUPLICATE
+# =============================================================================
+
+before_dedup = len(df)
+df = df.drop_duplicates(subset=['country', 'date'], keep='first')
+after_dedup = len(df)
+
+if before_dedup > after_dedup:
+    print(f"\n=== Deduplication ===")
+    print(f"Dropped {before_dedup - after_dedup} duplicate country-year observations")
+
+# =============================================================================
+# CREATE LOG GDP
+# =============================================================================
+
 df['log_gdp'] = np.log(df['gdp'])
 
-# Check the result
-print(df.head())
-print(f"Final dataset: {len(df)} rows, {df['country'].nunique()} countries")
+# =============================================================================
+# SUMMARY
+# =============================================================================
 
-# Save cleaned data
+print(f"\n=== Final Dataset ===")
+print(f"Observations: {len(df)}")
+print(f"Countries: {df['country'].nunique()}")
+print(f"Year range: {df['date'].min()} - {df['date'].max()}")
+
+# =============================================================================
+# SAVE
+# =============================================================================
+
 df.to_csv("C:/Users/kurtl/PycharmProjects/gravity_model/data/processed/gdp_cleaned.csv", index=False)
-
-print("Cleaned GDP data saved")
+print("\n=== Saved to gdp_cleaned.csv ===")

@@ -1,4 +1,6 @@
 """merge_gravity_data.py"""
+"""Merging all data into gravity dataset"""
+
 import pandas as pd
 import numpy as np
 
@@ -130,12 +132,22 @@ print(f"Observations: {len(df_gravity)}")
 print(f"Missing exporter remoteness: {df_gravity['remoteness_exporter'].isna().sum()}")
 
 # =============================================================================
+# CHECK FOR DUPLICATES
+# =============================================================================
+
+duplicates = df_gravity.duplicated(subset=['year', 'importer', 'exporter']).sum()
+if duplicates > 0:
+    print(f"\nWARNING: {duplicates} duplicate observations found")
+else:
+    print(f"\nNo duplicate observations")
+
+# =============================================================================
 # CHECK FOR MISSING VALUES
 # =============================================================================
 
 print("\n=== Missing Values Summary ===")
 key_vars = ['log_trade_real', 'log_gdp_importer', 'log_gdp_exporter', 'log_dist',
-            'contig', 'comlang_off', 'col45', 'rta', 'both_eu',
+            'contig', 'comlang_off', 'col_dep_ever', 'rta', 'both_eu',
             'efw_importer', 'efw_exporter', 'remoteness_importer', 'remoteness_exporter']
 for var in key_vars:
     if var in df_gravity.columns:

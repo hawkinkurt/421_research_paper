@@ -1,4 +1,6 @@
 """efw_data_cleaning.py"""
+"""Cleaning Economic Freedom of the World data"""
+
 import pandas as pd
 import pycountry
 
@@ -7,7 +9,7 @@ import pycountry
 # =============================================================================
 
 df = pd.read_excel(
-    "C:/Users/kurtl/PycharmProjects/gravity_model/data/raw/efotw-2025-master-index-data-for-researchers-iso.xlsx",
+    "C:/Users/kurtl/PycharmProjects/gravity_model/data/raw/base/efotw-2025-master-index-data-for-researchers-iso.xlsx",
     header=3
 )
 
@@ -152,3 +154,8 @@ df_final.to_csv(
     index=False
 )
 print("\n=== Saved to efw_cleaned.csv ===")
+
+
+# Check which countries have missing values and when
+missing = df_final[df_final['efw'].isna()]
+print(missing.groupby('country')['year'].agg(['min', 'max', 'count']))

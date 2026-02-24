@@ -1,11 +1,11 @@
 """gravity_cepii_cleaning.py"""
+"""Cleaning CEPII distance/gravity data"""
+
 import pandas as pd
 import numpy as np
 import pycountry
 
-# =============================================================================
-# LOAD DATA (only columns we need to reduce memory)
-# =============================================================================
+# LOAD DATA
 
 cols_to_keep = [
     'year', 'iso3_o', 'iso3_d',
@@ -20,21 +20,17 @@ cols_to_keep = [
 
 print("Loading CEPII Gravity dataset (this may take a moment)...")
 df = pd.read_csv(
-    "C:/Users/kurtl/PycharmProjects/gravity_model/data/raw/Gravity_V202211.csv",
+    "C:/Users/kurtl/PycharmProjects/gravity_model/data/raw/base/Gravity_V202211.csv",
     usecols=cols_to_keep
 )
 print(f"Loaded: {len(df):,} observations")
 
-# =============================================================================
 # FILTER TO RELEVANT YEARS (1990-2018)
-# =============================================================================
 
 df = df[(df['year'] >= 1990) & (df['year'] <= 2018)]
 print(f"After filtering to 1990-2018: {len(df):,} observations")
 
-# =============================================================================
 # CONVERT ISO3 TO ISO2
-# =============================================================================
 
 # Manual mappings for old/non-standard ISO3 codes
 manual_iso3_mappings = {
@@ -78,9 +74,7 @@ if len(failed_o) > 0:
 df = df.dropna(subset=['iso_o', 'iso_d'])
 print(f"After dropping failed conversions: {len(df):,} observations")
 
-# =============================================================================
 # CREATE DERIVED VARIABLES
-# =============================================================================
 
 # Log distance
 df['log_dist'] = np.log(df['dist'])
@@ -91,24 +85,17 @@ df['rta'] = (df['fta_wto'] == 1).astype(int)
 # Both countries in EU
 df['both_eu'] = ((df['eu_o'] == 1) & (df['eu_d'] == 1)).astype(int)
 
-# Both countries in WTO
-df['both_wto'] = ((df['wto_o'] == 1) & (df['wto_d'] == 1)).astype(int)
-
-# =============================================================================
 # SELECT AND RENAME FINAL COLUMNS
-# =============================================================================
 
 df_final = df[[
     'year', 'iso_o', 'iso_d',
     'dist', 'distcap', 'log_dist',
     'contig', 'comlang_off', 'comlang_ethno',
     'col45', 'col_dep_ever', 'comrelig',
-    'rta', 'both_eu', 'both_wto'
+    'rta', 'both_eu'
 ]].copy()
 
-# =============================================================================
 # DEDUPLICATE: Keep row with most complete data for each country-pair-year
-# =============================================================================
 
 print("\n=== Deduplicating ===")
 print(f"Before deduplication: {len(df_final):,} observations")
@@ -122,6 +109,14 @@ df_final = df_final.drop_duplicates(subset=['iso_o', 'iso_d', 'year'], keep='fir
 df_final = df_final.drop(columns=['completeness'])
 
 print(f"After deduplication: {len(df_final):,} observations")
+
+# Remove self-pairs (country paired with itself)
+before_count = len(df_final)
+df_final = df_final[df_final['iso_o'] != df_final['iso_d']]
+after_count = len(df_final)
+
+print(f"Removed {before_count - after_count:,} self-pair observations")
+print(f"Remaining: {after_count:,} observations")
 
 # =============================================================================
 # SUMMARY STATISTICS
