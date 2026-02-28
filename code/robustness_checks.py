@@ -712,3 +712,168 @@ Interpretation:
   {'positive and significant' if (coef_fe > 0 and pval_fe < 0.1) else 'insignificant'} 
   when controlling for all time-invariant country characteristics.
 """)
+
+# =============================================================================
+# ROBUSTNESS CHECK: COUNTRY-PAIR FIXED EFFECTS + YEAR FIXED EFFECTS
+# =============================================================================
+
+print("\n\n")
+print("=" * 70)
+print("ROBUSTNESS CHECK: COUNTRY-PAIR + YEAR FIXED EFFECTS")
+print("=" * 70)
+
+# Load data
+gravity = pd.read_csv(r'C:\Users\kurtl\PycharmProjects\gravity_model\data\processed\gravity_dataset_analysis.csv')
+
+# Create country-pair identifier (alphabetically sorted so US-UK = UK-US if undirected,
+# but we keep direction since trade flows are directional: exporter -> importer)
+gravity['pair_id'] = gravity['exporter'] + '_' + gravity['importer']
+
+print(f"\nTotal observations: {len(gravity):,}")
+print(f"Unique country pairs: {gravity['pair_id'].nunique()}")
+print(f"Year range: {gravity['year'].min()} - {gravity['year'].max()}")
+
+# Check how many observations per pair (need variation over time for FE to work)
+pair_counts = gravity.groupby('pair_id').size()
+print(f"\nObservations per pair:")
+print(f"  Mean:   {pair_counts.mean():.1f}")
+print(f"  Median: {pair_counts.median():.1f}")
+print(f"  Min:    {pair_counts.min()}")
+print(f"  Max:    {pair_counts.max()}")
+print(f"  Pairs with only 1 obs: {(pair_counts == 1).sum()} ({(pair_counts == 1).mean()*100:.1f}%)")
+
+# Drop pairs with only 1 observation (no within-pair variation)
+pairs_to_keep = pair_counts[pair_counts > 1].index
+gravity_panel = gravity[gravity['pair_id'].isin(pairs_to_keep)].copy()
+print(f"\nAfter dropping singleton pairs:")
+print(f"  Observations: {len(gravity_panel):,}")
+print(f"  Pairs: {gravity_panel['pair_id'].nunique()}")
+print(f"  Dropped: {len(gravity) - len(gravity_panel)} observations")
+
+# --- Prepare estimation ---
+
+# Time-varying variables (these survive country-pair FE)
+time_varying_vars = [
+    'log_gdp_importer',
+    'log_gdp_exporter',
+    'remoteness_importer',
+    'remoteness_exporter',
+    'efw_importer',
+    'efw_exporter',
+    'rta',
+    'incentive_exporter',
+    'incentive_importer'
+]
+
+# Time-invariant variables (absorbed by country-pair FE - listed for reference)
+absorbed_vars = ['log_dist', 'contig', 'comlang_off', 'col45']
+
+print(f"\nTime-varying variables (estimated):")
+for v in time_varying_vars:
+    print(f"  - {v}")
+print(f"\nTime-invariant variables (absorbed by pair FE):")
+for v in absorbed_vars:
+    print(f"  - {v}")
+
+# Drop rows with missing values in estimation variables
+est_vars = ['log_trade_real'] + time_varying_vars + ['pair_id', 'year']
+gravity_panel = gravity_panel.dropna(subset=est_vars)
+print(f"\nComplete cases for estimation: {len(gravity_panel):,}")
+
+# --- Check within-pair variation in incentive_exporter ---
+# This is critical: if incentive_exporter doesn't change within pairs, it gets absorbed
+incentive_variation = gravity_panel.groupby('pair_id')['incentive_exporter'].nunique()
+pairs_with_incentive_change = (incentive_variation > 1).sum()
+print(f"\nIncentive variation check:")
+print(f"  Pairs where incentive_exporter changes over time: {pairs_with_incentive_change}")
+print(f"  Pairs where incentive_exporter is constant: {(incentive_variation == 1).sum()}")
+print(f"  Share with variation: {pairs_with_incentive_change / len(incentive_variation) * 100:.1f}%")
+
+# Same check for RTA
+rta_variation = gravity_panel.groupby('pair_id')['rta'].nunique()
+pairs_with_rta_change = (rta_variation > 1).sum()
+print(f"\n  Pairs where RTA changes over time: {pairs_with_rta_change}")
+print(f"  Pairs where RTA is constant: {(rta_variation == 1).sum()}")
+
+# --- Estimate: Country-pair FE + Year FE using statsmodels ---
+import statsmodels.formula.api as smf
+
+# Model with country-pair and year fixed effects
+print("\n" + "-" * 70)
+print("ESTIMATING: OLS with Country-Pair FE + Year FE")
+print("-" * 70)
+
+formula = ('log_trade_real ~ '
+           'log_gdp_importer + log_gdp_exporter + '
+           'remoteness_importer + remoteness_exporter + '
+           'efw_importer + efw_exporter + '
+           'rta + incentive_exporter + incentive_importer + '
+           'C(pair_id) + C(year)')
+
+model_pair_fe = smf.ols(formula, data=gravity_panel).fit(cov_type='HC1')
+
+# Extract only the time-varying coefficients (not the FE dummies)
+print("\n" + "=" * 70)
+print("RESULTS: COUNTRY-PAIR + YEAR FIXED EFFECTS")
+print("=" * 70)
+
+print(f"\nObservations: {int(model_pair_fe.nobs)}")
+print(f"R-squared: {model_pair_fe.rsquared:.4f}")
+print(f"Adjusted R-squared: {model_pair_fe.rsquared_adj:.4f}")
+print(f"Country-pair dummies: {gravity_panel['pair_id'].nunique()}")
+print(f"Year dummies: {gravity_panel['year'].nunique()}")
+
+print(f"\n{'Variable':<25} {'Coef':>10} {'Std Err':>10} {'t':>8} {'P>|t|':>8} {'Sig':>5}")
+print("-" * 70)
+
+for var in time_varying_vars:
+    if var in model_pair_fe.params:
+        coef = model_pair_fe.params[var]
+        se = model_pair_fe.bse[var]
+        t = model_pair_fe.tvalues[var]
+        p = model_pair_fe.pvalues[var]
+        stars = "***" if p < 0.01 else "**" if p < 0.05 else "*" if p < 0.1 else ""
+        print(f"{var:<25} {coef:>10.4f} {se:>10.4f} {t:>8.3f} {p:>8.4f} {stars:>5}")
+
+# --- Comparison with main Model 7 (no pair FE) ---
+print("\n\n" + "=" * 70)
+print("COMPARISON: MAIN MODEL vs COUNTRY-PAIR FE")
+print("=" * 70)
+
+# Re-estimate main model (Model 7 with year FE) on the same sample for fair comparison
+formula_main = ('log_trade_real ~ '
+                'log_gdp_importer + log_gdp_exporter + '
+                'log_dist + contig + comlang_off + col45 + '
+                'remoteness_importer + remoteness_exporter + '
+                'efw_importer + efw_exporter + '
+                'rta + incentive_exporter + incentive_importer + '
+                'C(year)')
+
+model_main = smf.ols(formula_main, data=gravity_panel).fit(cov_type='HC1')
+
+# Print side-by-side comparison
+compare_vars = time_varying_vars + ['log_dist', 'contig', 'comlang_off', 'col45']
+
+print(f"\n{'Variable':<25} {'Model 7':>12} {'Pair FE':>12}")
+print("-" * 52)
+
+for var in compare_vars:
+    row = f"{var:<25}"
+
+    # Model 7
+    if var in model_main.params:
+        coef = model_main.params[var]
+        p = model_main.pvalues[var]
+        stars = "***" if p < 0.01 else "**" if p < 0.05 else "*" if p < 0.1 else ""
+        row += f" {coef:>8.4f}{stars:<3}"
+    else:
+        row += f" {'--':>11}"
+
+    # Country-pair FE
+    if var in model_pair_fe.params:
+        coef = model_pair_fe.params[var]
+        p = model_pair_fe.pvalues[var]
+        stars = "***" if p < 0.01 else "**" if p < 0.05 else "*" if p < 0.1 else ""
+        row += f" {coef:>8.4f}{stars:<3}"
+    else:
+        row += f" {'absorbed':>11}"

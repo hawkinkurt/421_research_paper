@@ -39,15 +39,9 @@ print("=" * 70)
 print("PHASE 1: LOCATE IMDb DATASET")
 print("=" * 70)
 
-data_path = r'C:\Users\kurtl\.cache\kagglehub\datasets\raedaddala\imdb-movies-from-1960-to-2023\versions\5'
-
-if os.path.exists(data_path):
-    print("IMDb dataset already downloaded, skipping download")
-else:
-    print("Downloading dataset...")
-    import kagglehub
-    data_path = kagglehub.dataset_download("raedaddala/imdb-movies-from-1960-to-2023")
-    print(f"Downloaded to: {data_path}")
+import kagglehub
+data_path = kagglehub.dataset_download("raedaddala/imdb-movies-from-1960-to-2023")
+print(f"Dataset path: {data_path}")
 
 # Find the CSV files — this dataset uses year subfolders: Data/1990/, Data/1991/, etc.
 print(f"Searching for CSV files under: {data_path}")
