@@ -4,7 +4,7 @@ imdb_filming_gravity_analysis.py
 Script 2 of 2 for the Filming Location Gravity Model.
 
 Standalone gravity model analysis using IMDb filming location data.
-Mirrors the structure of batis_gravity_analysis.py.
+Mirrors the structure of old_batis_gravity_analysis_old.py.
 
 Pipeline:
   1. Load bilateral filming trade flows (from Script 1)
@@ -282,13 +282,19 @@ if has_generosity:
 else:
     merged['generosity_exp'] = 0
 
-# Verify: type dummies should sum to overall incentive dummy
+# Verify: type dummies — every active incentive should have at least one type set
+# Note: some countries have dual types (e.g. CO has cash_rebate + transferable_credit)
 type_sum = sum(merged[f'{d}_exp'] for d in TYPE_DUMMIES)
-mismatch = (type_sum != merged['incentive_exporter']).sum()
-if mismatch > 0:
-    print(f"\n  WARNING: {mismatch} rows where type dummies don't sum to overall incentive")
+active_no_type = ((merged['incentive_exporter'] == 1) & (type_sum == 0)).sum()
+inactive_with_type = ((merged['incentive_exporter'] == 0) & (type_sum > 0)).sum()
+dual_type_rows = ((merged['incentive_exporter'] == 1) & (type_sum > 1)).sum()
+
+if active_no_type > 0 or inactive_with_type > 0:
+    print(f"\n  WARNING: {active_no_type} active rows with no type; {inactive_with_type} inactive rows with type")
 else:
-    print(f"\n  ✓ Type dummies sum correctly to overall incentive dummy")
+    print(f"\n  ✓ Type dummies consistent with overall incentive dummy")
+if dual_type_rows > 0:
+    print(f"  ℹ {dual_type_rows} rows from dual-type countries (counted in multiple type categories)")
 
 # =============================================================================
 # PHASE 6: CALCULATE REMOTENESS
