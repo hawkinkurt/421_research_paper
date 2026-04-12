@@ -1,0 +1,42 @@
+"""data_fetch.py"""
+"""Fetching GDP, CPI, and movie data via APIs"""
+
+import os
+import wbdata
+import kagglehub
+import shutil
+import pandas as pd
+from datetime import datetime
+
+# Download World Bank GDP data
+filepath = "C:/Users/kurtl/PycharmProjects/gravity_model/data/raw/world_bank_gdp.csv"
+
+if os.path.exists(filepath):
+    print("GDP data file already exists, skipping download")
+    df = pd.read_csv(filepath)
+else:
+    print("Downloading data...")
+    start_date = datetime(1990, 1, 1)
+    end_date = datetime(2023, 12, 31)
+    indicators = {"NY.GDP.MKTP.CD": "gdp"}
+    df = wbdata.get_dataframe(indicators, date=(start_date, end_date))
+    df = df.reset_index()
+    df.to_csv("C:/Users/kurtl/PycharmProjects/gravity_model/data/raw/world_bank_gdp.csv", index=False)
+    print("Data saved")
+
+# Download World Bank CPI data
+filepath = "C:/Users/kurtl/PycharmProjects/gravity_model/data/raw/world_bank_cpi.csv"
+
+if os.path.exists(filepath):
+    print("CPI data file already exists, skipping download")
+    df = pd.read_csv(filepath)
+else:
+    print("Downloading data...")
+    start_date = datetime(1990, 1, 1)
+    end_date = datetime(2023, 12, 31)
+    indicators = {"FP.CPI.TOTL": "cpi"}
+    countries = ["USA"]
+    df_cpi = wbdata.get_dataframe(indicators, country=countries, date=(start_date, end_date))
+    df_cpi = df_cpi.reset_index()
+    df_cpi.to_csv("C:/Users/kurtl/PycharmProjects/gravity_model/data/raw/world_bank_cpi.csv", index=False)
+    print("Data saved")
