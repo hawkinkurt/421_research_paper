@@ -2,18 +2,29 @@
 batis_gravity_analysis.py
 =========================
 Gravity model estimation using BaTIS SK1 (audiovisual services) data.
-Loads pre-prepared datasets from batis_data_prep.py.
+Loads pre-prepared datasets from data_fetch_clean.py Phase 7.
 
-Run batis_data_prep.py FIRST to create the analysis datasets.
+Models (run for both raw EFW and income-adjusted EFWRESID):
 
-Phases:
-  1. Load analysis datasets
-  2. Incremental gravity models (M1-M9)
-  3. Importer + Exporter + Year FE
-  4. Country-pair + Year FE (multiple subsamples + types + generosity)
-  5. Event study
-  6. Cluster effects
-  7. Summary
+  ─── PPML with Importer + Exporter + Year FE ───
+  M1:  Baseline gravity (GDP, distance, remoteness)
+  M2:  + cultural/historical proximity + RTA + EFW
+  M3:  + incentive dummies (exporter & importer)
+  M4:  + incentive type dummies (replacing exporter incentive)
+  M5:  + generosity (exporter & importer, replacing incentive dummies)
+  M6:  Cluster: M3 + years_active
+  M7:  Cluster: early vs late adopters (replacing exporter incentive)
+
+  ─── OLS with Country-Pair + Year FE (within-transformation) ───
+  M8:  Incentive dummies (mirrors M3)
+  M9:  Event study (relative-time dummies replacing exporter incentive)
+  M10: Cluster: M8 + years_active
+
+  Pair FE models (M8, M9, M10) each run on:
+    (a) Full sample
+    (b) Excluding Anglo-to-Anglo pairs
+    (c) Excluding all Anglo pairs
+    (d) Without EFW controls
 """
 
 import pandas as pd
@@ -37,6 +48,10 @@ EVENT_WINDOW_MIN = -5
 EVENT_WINDOW_MAX = 10
 MAX_YEARS_ACTIVE = 20
 EARLY_CUTOFF = 2005
+
+# BaTIS dependent variable: PPML uses level, OLS pair FE uses log
+PPML_DEP = 'trade_value'
+OLS_DEP = 'log_trade'
 
 
 # =============================================================================
@@ -62,479 +77,688 @@ incentive_dict = dict(zip(
 ))
 
 has_generosity = 'generosity_exp' in df.columns and df['generosity_exp'].nunique() > 1
-print(f"Generosity data available: {has_generosity}")
+print(f"Generosity exporter data available: {has_generosity}")
+
+has_generosity_imp = 'generosity_imp' in df.columns and df['generosity_imp'].nunique() > 1
+print(f"Generosity importer data available: {has_generosity_imp}")
+
+has_efwresid = ('efwresid_exporter' in df.columns
+                and df['efwresid_exporter'].notna().sum() > 50)
+print(f"EFWRESID data available: {has_efwresid}")
+if has_efwresid:
+    print(f"  efwresid_exporter coverage: {df['efwresid_exporter'].notna().sum():,}")
+    print(f"  efwresid_importer coverage: {df['efwresid_importer'].notna().sum():,}")
+
+# Type dummy variables
+type_dummy_vars = [f'{d}_exp' for d in
+                   ['is_refundable_credit', 'is_transferable_credit',
+                    'is_standard_credit', 'is_cash_rebate']]
+type_vars_available = [v for v in type_dummy_vars
+                       if v in df.columns and df[v].nunique() > 1]
+print(f"Incentive type dummies available: {type_vars_available}")
+
+# Pre-compute derived variables on all dataframes
+print("\nPre-computing derived variables...")
+for d_label, d in [('Analysis', df), ('Merged', merged)]:
+    d['intro_year_exp'] = d['exporter'].map(incentive_dict)
+    d['years_active_exp'] = np.where(
+        (d['incentive_exporter'] == 1) & d['intro_year_exp'].notna(),
+        np.minimum(d['year'] - d['intro_year_exp'], MAX_YEARS_ACTIVE), 0
+    )
+    d['early_adopter_exp'] = d.apply(
+        lambda row: (1 if (row['exporter'] in incentive_dict
+                           and pd.notna(incentive_dict[row['exporter']])
+                           and incentive_dict[row['exporter']] < EARLY_CUTOFF
+                           and row['year'] >= incentive_dict[row['exporter']])
+                     else 0), axis=1)
+    d['late_adopter_exp'] = d.apply(
+        lambda row: (1 if (row['exporter'] in incentive_dict
+                           and pd.notna(incentive_dict[row['exporter']])
+                           and incentive_dict[row['exporter']] >= EARLY_CUTOFF
+                           and row['year'] >= incentive_dict[row['exporter']])
+                     else 0), axis=1)
+    print(f"  {d_label}: years_active>0: {(d['years_active_exp'] > 0).sum():,}, "
+          f"early: {d['early_adopter_exp'].sum():,}, "
+          f"late: {d['late_adopter_exp'].sum():,}")
 
 
 # =============================================================================
 # HELPERS
 # =============================================================================
 
-def extract_incentive_coef(model, var_name):
+def fit_ppml(formula, data, label=""):
+    """Fit PPML (GLM Poisson) with pair-clustered standard errors."""
+    try:
+        # Create pair identifier for clustering
+        pair_ids = data['exporter'].astype(str) + '_' + data['importer'].astype(str)
+        m = smf.glm(formula, data=data,
+                     family=sm.families.Poisson()).fit(
+            maxiter=100,
+            cov_type='cluster',
+            cov_kwds={'groups': pair_ids}
+        )
+        return m
+    except Exception as e:
+        print(f"  PPML failed{' (' + label + ')' if label else ''}: {e}")
+        return None
+
+
+def pseudo_r2(m):
+    """McFadden pseudo R-squared."""
+    if m is None:
+        return np.nan
+    return 1 - m.deviance / m.null_deviance
+
+
+def print_model_results(m, var_list, label=""):
+    """Print key coefficients from a fitted model."""
+    if m is None:
+        print(f"  {label}: model not estimated")
+        return
+    print(f"\n{'Variable':<30} {'Coef':>10} {'SE':>10} {'p':>8} {'Sig':>5} {'% effect':>10}")
+    print("-" * 75)
+    for var in var_list:
+        lookup = var if var in m.params else f'{var}_dm'
+        if lookup in m.params:
+            coef = m.params[lookup]
+            se = m.bse[lookup]
+            p = m.pvalues[lookup]
+            stars = "***" if p < 0.01 else "**" if p < 0.05 else "*" if p < 0.1 else ""
+            pct = (np.exp(coef) - 1) * 100
+            print(f"{var:<30} {coef:>10.4f} {se:>10.4f} {p:>8.4f} {stars:>5} {pct:>+9.1f}%")
+        else:
+            print(f"{var:<30} {'--':>10}")
+
+
+def fmt_coef(model, var_name):
+    """Format a coefficient for summary tables."""
+    if model is None:
+        return f"{'--':>14}"
     for lookup in [var_name, f'{var_name}_dm']:
         if lookup in model.params:
             coef = model.params[lookup]
             p = model.pvalues[lookup]
-            stars = "***" if p < 0.01 else "**" if p < 0.05 else "*" if p < 0.1 else ""
+            stars = ("***" if p < 0.01 else "**" if p < 0.05
+                     else "*" if p < 0.1 else "")
             pct = (np.exp(coef) - 1) * 100
             return f"{coef:>6.3f}{stars:<3}({pct:>+.0f}%)"
     return f"{'--':>14}"
 
-def get_model_by_name(models_list, name):
-    for mname, model in models_list:
-        if mname == name:
-            return model
-    return None
 
 def run_pair_fe(df_sub, dep_var, tv, label):
+    """
+    Run OLS pair FE with within-transformation.
+    Returns the fitted model or None.
+    """
     df_sub = df_sub.copy()
     df_sub['pair_id'] = df_sub['exporter'] + '_' + df_sub['importer']
+
+    # Drop singleton pairs
     pc = df_sub.groupby('pair_id').size()
     df_panel = df_sub[df_sub['pair_id'].isin(pc[pc > 1].index)].copy()
 
+    # Filter to valid dependent variable
+    df_panel = df_panel[df_panel[dep_var].notna()].copy()
+
     print(f"\n{'='*70}")
-    print(f"COUNTRY-PAIR + YEAR FE: {label}")
+    print(f"PAIR FE (OLS): {label}")
     print(f"{'='*70}")
     print(f"Observations: {len(df_panel):,}, Pairs: {df_panel['pair_id'].nunique()}")
 
+    if len(df_panel) < 50:
+        print(f"  SKIPPED - too few observations ({len(df_panel)})")
+        return None
+
+    # Report within-pair variation in incentive variables
     for inc_var in ['incentive_exporter', 'incentive_importer']:
         if inc_var in tv:
             iv = df_panel.groupby('pair_id')[inc_var].nunique()
-            print(f"  {inc_var} varies: {(iv > 1).sum()} ({(iv > 1).mean()*100:.1f}%)")
+            n_varies = (iv > 1).sum()
+            print(f"  {inc_var} varies within pair: "
+                  f"{n_varies} ({n_varies / len(iv) * 100:.1f}%)")
 
+    # Within-transformation (demean by pair)
     demean_vars = [dep_var] + tv
     df_dm = df_panel.copy()
     pm = df_panel.groupby('pair_id')[demean_vars].transform('mean')
     for var in demean_vars:
         df_dm[f'{var}_dm'] = df_panel[var] - pm[var]
 
-    dm_formula = f'{dep_var}_dm ~ ' + ' + '.join([f'{v}_dm' for v in tv]) + ' + C(year) - 1'
-    m = smf.ols(dm_formula, data=df_dm).fit(cov_type='HC1')
+    # OLS on demeaned data with year dummies
+    dm_formula = (f'{dep_var}_dm ~ '
+                  + ' + '.join([f'{v}_dm' for v in tv])
+                  + ' + C(year) - 1')
+    m = smf.ols(dm_formula, data=df_dm).fit(
+        cov_type='cluster',
+        cov_kwds={'groups': df_dm['pair_id']}
+    )
 
+    # Within R-squared
     ss_res = np.sum(m.resid ** 2)
     ss_tot = np.sum(df_dm[f'{dep_var}_dm'] ** 2)
     within_r2 = 1 - ss_res / ss_tot if ss_tot > 0 else np.nan
 
-    print(f"\nWithin R²: {within_r2:.4f}, N: {int(m.nobs)}")
-    print(f"\n{'Variable':<30} {'Coef':>10} {'SE':>10} {'p':>8} {'Sig':>5}")
-    print("-" * 65)
-    for var in tv:
-        dm_var = f'{var}_dm'
-        if dm_var in m.params:
-            coef = m.params[dm_var]
-            se = m.bse[dm_var]
-            p = m.pvalues[dm_var]
-            stars = "***" if p < 0.01 else "**" if p < 0.05 else "*" if p < 0.1 else ""
-            print(f"{var:<30} {coef:>10.4f} {se:>10.4f} {p:>8.4f} {stars:>5}")
+    print(f"Within R²: {within_r2:.4f}, N: {int(m.nobs)}")
+    print_model_results(m, tv, label)
 
     return m
 
 
-# =============================================================================
-# PHASE 2: INCREMENTAL GRAVITY MODELS
-# =============================================================================
-
-print("\n" + "=" * 70)
-print("PHASE 2: INCREMENTAL GRAVITY MODELS")
-print("=" * 70)
-
-m1 = smf.ols('log_trade ~ log_gdp_importer + log_gdp_exporter + log_dist', data=df).fit(cov_type='HC1')
-print(f"\nM1 (Baseline): R²={m1.rsquared:.4f}, N={int(m1.nobs)}")
-
-m2 = smf.ols('log_trade ~ log_gdp_importer + log_gdp_exporter + log_dist + contig + comlang_off + col45', data=df).fit(cov_type='HC1')
-print(f"M2 (+Cultural): R²={m2.rsquared:.4f}")
-
-m3 = smf.ols('log_trade ~ log_gdp_importer + log_gdp_exporter + log_dist + contig + comlang_off + col45 + remoteness_importer + remoteness_exporter', data=df).fit(cov_type='HC1')
-print(f"M3 (+Remoteness): R²={m3.rsquared:.4f}")
-
-m4 = smf.ols('log_trade ~ log_gdp_importer + log_gdp_exporter + log_dist + contig + comlang_off + col45 + remoteness_importer + remoteness_exporter + rta', data=df).fit(cov_type='HC1')
-print(f"M4 (+RTA): R²={m4.rsquared:.4f}")
-
-m5 = smf.ols('log_trade ~ log_gdp_importer + log_gdp_exporter + log_dist + contig + comlang_off + col45 + remoteness_importer + remoteness_exporter + rta + efw_importer + efw_exporter', data=df).fit(cov_type='HC1')
-print(f"M5 (+EFW): R²={m5.rsquared:.4f}")
-
-f6 = 'log_trade ~ log_gdp_importer + log_gdp_exporter + log_dist + contig + comlang_off + col45 + remoteness_importer + remoteness_exporter + rta + efw_importer + efw_exporter + C(year)'
-m6, m7, m8, m9 = None, None, None, None
-
-type_dummy_vars = [f'{d}_exp' for d in ['is_refundable_credit', 'is_transferable_credit', 'is_standard_credit', 'is_cash_rebate']]
-type_vars_with_var = [v for v in type_dummy_vars if v in df.columns and df[v].nunique() > 1]
-
-try:
-    m6 = smf.ols(f6, data=df).fit(cov_type='HC1')
-    print(f"M6 (+Year FE): R²={m6.rsquared:.4f}")
-
-    m7 = smf.ols(f6 + ' + incentive_exporter + incentive_importer', data=df).fit(cov_type='HC1')
-    print(f"M7 (+Incentives): R²={m7.rsquared:.4f}")
-
-    f8 = f6 + ' + ' + ' + '.join(type_vars_with_var) + ' + incentive_importer'
-    m8 = smf.ols(f8, data=df).fit(cov_type='HC1')
-    print(f"M8 (+Incentive Types): R²={m8.rsquared:.4f}")
-
-    if has_generosity:
-        f9 = f6 + ' + generosity_exp + incentive_importer'
-        m9 = smf.ols(f9, data=df).fit(cov_type='HC1')
-        print(f"M9 (+Generosity): R²={m9.rsquared:.4f}")
-
-except (MemoryError, np.linalg.LinAlgError) as e:
-    print(f"  SKIPPED M6+ — {type(e).__name__}")
-
-# Comparison table
-key_vars = [
-    'log_gdp_importer', 'log_gdp_exporter', 'log_dist',
-    'contig', 'comlang_off', 'col45',
-    'remoteness_importer', 'remoteness_exporter',
-    'rta', 'efw_importer', 'efw_exporter',
-    'incentive_exporter', 'incentive_importer', 'generosity_exp'
-] + type_vars_with_var
-
-all_models = [('M1', m1), ('M2', m2), ('M3', m3), ('M4', m4), ('M5', m5)]
-for name, m in [('M6', m6), ('M7', m7), ('M8', m8), ('M9', m9)]:
-    if m is not None:
-        all_models.append((name, m))
-
-print(f"\n{'Variable':<25}" + "".join([f"{n:>10}" for n, _ in all_models]))
-print("-" * (25 + 10 * len(all_models)))
-for var in key_vars:
-    row = f"{var:<25}"
-    for name, m in all_models:
-        if var in m.params:
-            coef = m.params[var]
-            p = m.pvalues[var]
-            stars = "***" if p < 0.01 else "**" if p < 0.05 else "*" if p < 0.1 else ""
-            row += f"{coef:>7.3f}{stars:<3}"
-        else:
-            row += f"{'--':>10}"
-    print(row)
-print("-" * (25 + 10 * len(all_models)))
-print(f"{'R-squared':<25}" + "".join([f"{m.rsquared:>10.4f}" for _, m in all_models]))
-print(f"{'Observations':<25}" + "".join([f"{int(m.nobs):>10}" for _, m in all_models]))
-print("* p<0.1, ** p<0.05, *** p<0.01")
-
-
-# =============================================================================
-# PHASE 3: IMPORTER + EXPORTER + YEAR FE
-# =============================================================================
-
-m_fe = None
-m_fe_types = None
-
-try:
+def run_event_study(df_src, log_dep_var, tv_controls, label_str):
+    """Run OLS pair FE event study with incentive_importer control."""
     print(f"\n{'='*70}")
-    print("IMPORTER + EXPORTER + YEAR FE")
+    print(f"EVENT STUDY: {label_str}")
     print(f"{'='*70}")
 
-    m_fe = smf.ols('log_trade ~ log_dist + contig + comlang_off + col45 + rta + '
-                    'incentive_exporter + incentive_importer + '
-                    'C(importer) + C(exporter) + C(year)', data=df).fit(cov_type='HC1')
+    # Restrict to exporters with known incentive intro dates
+    df_ev = df_src[df_src['exporter'].map(incentive_dict).notna()].copy()
+    df_ev['intro_year_exp'] = df_ev['exporter'].map(incentive_dict)
+    df_ev['rel_year'] = (df_ev['year'] - df_ev['intro_year_exp']).astype(int)
+    df_ev = df_ev[(df_ev['rel_year'] >= EVENT_WINDOW_MIN) &
+                  (df_ev['rel_year'] <= EVENT_WINDOW_MAX)].copy()
 
-    fe_vars = ['log_dist', 'contig', 'comlang_off', 'col45', 'rta', 'incentive_exporter', 'incentive_importer']
-    print(f"R²: {m_fe.rsquared:.4f}, N: {int(m_fe.nobs)}")
-    print(f"\n{'Variable':<25} {'Coef':>10} {'SE':>10} {'p':>8} {'Sig':>5}")
+    if log_dep_var not in df_ev.columns:
+        print(f"  SKIPPED - {log_dep_var} not in data")
+        return None
+
+    df_ev = df_ev[df_ev[log_dep_var].notna()].copy()
+    print(f"Sample: {len(df_ev):,} obs, "
+          f"{df_ev['exporter'].nunique()} exporters with incentive")
+
+    if len(df_ev) < 50:
+        print(f"  SKIPPED - too few observations")
+        return None
+
+    # Create relative-time dummies (t-1 is omitted reference)
+    for t in range(EVENT_WINDOW_MIN, EVENT_WINDOW_MAX + 1):
+        if t != -1:
+            df_ev[f'rel_t{t}'] = (df_ev['rel_year'] == t).astype(int)
+
+    # Pair FE setup — drop singletons
+    df_ev['pair_id'] = df_ev['exporter'] + '_' + df_ev['importer']
+    pc = df_ev.groupby('pair_id').size()
+    df_ev = df_ev[df_ev['pair_id'].isin(pc[pc > 1].index)].copy()
+    print(f"After dropping singletons: {len(df_ev):,} obs, "
+          f"{df_ev['pair_id'].nunique()} pairs")
+
+    if len(df_ev) < 50:
+        print(f"  SKIPPED - too few observations after dropping singletons")
+        return None
+
+    # Controls: time-varying gravity vars + importer incentive
+    # Remove exporter incentive (replaced by event dummies)
+    controls = [v for v in tv_controls
+                if v != 'incentive_exporter']
+    # Ensure incentive_importer is included
+    if 'incentive_importer' not in controls:
+        controls.append('incentive_importer')
+
+    rel_vars = [f'rel_t{t}'
+                for t in range(EVENT_WINDOW_MIN, EVENT_WINDOW_MAX + 1)
+                if t != -1]
+
+    # Within-transformation
+    all_ev_vars = [log_dep_var] + controls + rel_vars
+    df_dm = df_ev.copy()
+    pm = df_ev.groupby('pair_id')[all_ev_vars].transform('mean')
+    for var in all_ev_vars:
+        df_dm[f'{var}_dm'] = df_ev[var] - pm[var]
+
+    # Year dummies
+    year_dummies = pd.get_dummies(df_dm['year'], prefix='yr',
+                                  drop_first=True, dtype=float)
+    X = pd.concat([df_dm[[f'{v}_dm' for v in controls + rel_vars]],
+                    year_dummies], axis=1)
+    y = df_dm[f'{log_dep_var}_dm']
+
+    m_ev = sm.OLS(y, X).fit(
+        cov_type='cluster',
+        cov_kwds={'groups': df_dm['pair_id']}
+    )
+
+    # Print event study coefficients
+    print(f"\n{'Rel Year':>10} {'Coef':>10} {'SE':>10} "
+          f"{'95% CI':>22} {'Sig':>5}")
     print("-" * 60)
-    for var in fe_vars:
-        if var in m_fe.params:
-            print(f"{var:<25} {m_fe.params[var]:>10.4f} {m_fe.bse[var]:>10.4f} "
-                  f"{m_fe.pvalues[var]:>8.4f} "
-                  f"{'***' if m_fe.pvalues[var]<0.01 else '**' if m_fe.pvalues[var]<0.05 else '*' if m_fe.pvalues[var]<0.1 else '':>5}")
-except (MemoryError, np.linalg.LinAlgError) as e:
-    print(f"  SKIPPED — {type(e).__name__}")
 
-try:
+    event_coefs = []
+    for t in range(EVENT_WINDOW_MIN, EVENT_WINDOW_MAX + 1):
+        if t == -1:
+            event_coefs.append((t, 0, 0, 0, 0))
+            print(f"{'t-1':>10} {'0.000':>10} {'(ref)':>10}")
+            continue
+        dm_var = f'rel_t{t}_dm'
+        if dm_var in m_ev.params:
+            coef = m_ev.params[dm_var]
+            se = m_ev.bse[dm_var]
+            p = m_ev.pvalues[dm_var]
+            ci_lo = coef - 1.96 * se
+            ci_hi = coef + 1.96 * se
+            stars = ("***" if p < 0.01 else "**" if p < 0.05
+                     else "*" if p < 0.1 else "")
+            event_coefs.append((t, coef, se, ci_lo, ci_hi))
+            print(f"{'t' + format(t, '+d'):>10} {coef:>10.4f} "
+                  f"{se:>10.4f} [{ci_lo:>8.4f}, {ci_hi:>8.4f}] "
+                  f"{stars:>5}")
+
+    # Print importer incentive coefficient
+    imp_dm = 'incentive_importer_dm'
+    if imp_dm in m_ev.params:
+        coef = m_ev.params[imp_dm]
+        se = m_ev.bse[imp_dm]
+        p = m_ev.pvalues[imp_dm]
+        stars = ("***" if p < 0.01 else "**" if p < 0.05
+                 else "*" if p < 0.1 else "")
+        print(f"\n  incentive_importer: {coef:.4f} (SE={se:.4f}, p={p:.4f}) {stars}")
+
+    # Summary statistics
+    pre_coefs = [c for t, c, s, lo, hi in event_coefs
+                 if EVENT_WINDOW_MIN <= t < -1]
+    post_coefs = [c for t, c, s, lo, hi in event_coefs if t >= 0]
+    if pre_coefs and post_coefs:
+        print(f"\n  Avg pre-treatment (t-5 to t-2): "
+              f"{np.mean(pre_coefs):.4f}")
+        print(f"  Avg post-treatment (t0 to t+10): "
+              f"{np.mean(post_coefs):.4f}")
+
+    return m_ev
+
+
+# =============================================================================
+# EFW VARIANT DEFINITIONS
+# =============================================================================
+
+EFW_VARIANTS = {
+    'EFW': {
+        'exp': 'efw_exporter',
+        'imp': 'efw_importer',
+        'label': 'Raw EFW',
+    },
+}
+
+if has_efwresid:
+    EFW_VARIANTS['EFWRESID'] = {
+        'exp': 'efwresid_exporter',
+        'imp': 'efwresid_importer',
+        'label': 'Income-adjusted EFWRESID',
+    }
+
+print(f"\nEFW variants to run: {list(EFW_VARIANTS.keys())}")
+
+
+# =============================================================================
+# MAIN ESTIMATION LOOP
+# =============================================================================
+
+all_results = {}
+
+for efw_key, efw_cfg in EFW_VARIANTS.items():
+    efw_exp = efw_cfg['exp']
+    efw_imp = efw_cfg['imp']
+    efw_label = efw_cfg['label']
+
+    # ─── Build formula components for this EFW variant ───
+    FE_TERMS = 'C(importer) + C(exporter) + C(year)'
+
+    BASELINE_VARS = ('log_gdp_importer + log_gdp_exporter + log_dist + '
+                     'remoteness_importer + remoteness_exporter')
+
+    CULTURAL_VARS = (f'contig + comlang_off + col45 + rta + '
+                     f'{efw_exp} + {efw_imp}')
+
+    FULL_GRAVITY = f'{BASELINE_VARS} + {CULTURAL_VARS}'
+
+    TV_FULL = [
+        'log_gdp_importer', 'log_gdp_exporter',
+        'remoteness_importer', 'remoteness_exporter',
+        efw_exp, efw_imp,
+        'rta', 'incentive_exporter', 'incentive_importer'
+    ]
+
+    TV_NO_EFW = [v for v in TV_FULL if v not in [efw_exp, efw_imp]]
+
+    tag = f"BaTIS [{efw_label}]"
+
+    print(f"\n\n{'#'*70}")
+    print(f"# {'='*66} #")
+    print(f"#   EFW VARIANT: {efw_label:>48} #")
+    print(f"# {'='*66} #")
+    print(f"{'#'*70}")
+
+    sr = {}
+
+    # ─────────────────────────────────────────────────────────────────
+    # MODEL 1: Baseline gravity (PPML)
+    # ─────────────────────────────────────────────────────────────────
+
     print(f"\n{'='*70}")
-    print("IMP+EXP+YEAR FE WITH INCENTIVE TYPES")
+    print(f"MODEL 1: Baseline Gravity (PPML) - {tag}")
     print(f"{'='*70}")
 
-    type_vars_in_sample = [v for v in type_dummy_vars if v in df.columns and df[v].nunique() > 1]
-    m_fe_types = smf.ols('log_trade ~ log_dist + contig + comlang_off + col45 + rta + '
-                          + ' + '.join(type_vars_in_sample) + ' + incentive_importer + '
-                          'C(importer) + C(exporter) + C(year)', data=df).fit(cov_type='HC1')
-    print(f"R²: {m_fe_types.rsquared:.4f}, N: {int(m_fe_types.nobs)}")
-    fe_type_vars = ['log_dist', 'contig', 'comlang_off', 'col45', 'rta', 'incentive_importer'] + type_vars_in_sample
-    print(f"\n{'Variable':<30} {'Coef':>10} {'SE':>10} {'p':>8} {'Sig':>5}")
-    print("-" * 65)
-    for var in fe_type_vars:
-        if var in m_fe_types.params:
-            print(f"{var:<30} {m_fe_types.params[var]:>10.4f} {m_fe_types.bse[var]:>10.4f} "
-                  f"{m_fe_types.pvalues[var]:>8.4f} "
-                  f"{'***' if m_fe_types.pvalues[var]<0.01 else '**' if m_fe_types.pvalues[var]<0.05 else '*' if m_fe_types.pvalues[var]<0.1 else '':>5}")
-except (MemoryError, np.linalg.LinAlgError) as e:
-    print(f"  SKIPPED — {type(e).__name__}")
+    f1 = f'{PPML_DEP} ~ {BASELINE_VARS} + {FE_TERMS}'
+    m1 = fit_ppml(f1, df, "M1")
+    if m1:
+        print(f"Pseudo-R²: {pseudo_r2(m1):.4f}, N: {int(m1.nobs)}")
+        print_model_results(m1, [
+            'log_gdp_importer', 'log_gdp_exporter', 'log_dist',
+            'remoteness_importer', 'remoteness_exporter'
+        ], "M1")
+    sr['M1'] = m1
+
+    # ─────────────────────────────────────────────────────────────────
+    # MODEL 2: Full gravity (PPML)
+    # ─────────────────────────────────────────────────────────────────
+
+    print(f"\n{'='*70}")
+    print(f"MODEL 2: Full Gravity (PPML) - {tag}")
+    print(f"{'='*70}")
+
+    f2 = f'{PPML_DEP} ~ {FULL_GRAVITY} + {FE_TERMS}'
+    m2 = fit_ppml(f2, df, "M2")
+    if m2:
+        print(f"Pseudo-R²: {pseudo_r2(m2):.4f}, N: {int(m2.nobs)}")
+        print_model_results(m2, [
+            'log_gdp_importer', 'log_gdp_exporter', 'log_dist',
+            'remoteness_importer', 'remoteness_exporter',
+            'contig', 'comlang_off', 'col45', 'rta',
+            efw_exp, efw_imp
+        ], "M2")
+    sr['M2'] = m2
+
+    # ─────────────────────────────────────────────────────────────────
+    # MODEL 3: Incentive dummies (PPML)
+    # ─────────────────────────────────────────────────────────────────
+
+    print(f"\n{'='*70}")
+    print(f"MODEL 3: Incentive Dummies (PPML) - {tag}")
+    print(f"{'='*70}")
+
+    f3 = (f'{PPML_DEP} ~ {FULL_GRAVITY} + '
+          f'incentive_exporter + incentive_importer + {FE_TERMS}')
+    m3 = fit_ppml(f3, df, "M3")
+    if m3:
+        print(f"Pseudo-R²: {pseudo_r2(m3):.4f}, N: {int(m3.nobs)}")
+        print_model_results(m3, [
+            'log_dist', 'contig', 'comlang_off', 'col45', 'rta',
+            efw_exp, efw_imp,
+            'incentive_exporter', 'incentive_importer'
+        ], "M3")
+    sr['M3'] = m3
+
+    # ─────────────────────────────────────────────────────────────────
+    # MODEL 4: Incentive type dummies (PPML)
+    # ─────────────────────────────────────────────────────────────────
+
+    print(f"\n{'='*70}")
+    print(f"MODEL 4: Incentive Types (PPML) - {tag}")
+    print(f"{'='*70}")
+
+    m4 = None
+    if type_vars_available:
+        type_str = ' + '.join(type_vars_available)
+        f4 = (f'{PPML_DEP} ~ {FULL_GRAVITY} + '
+              f'{type_str} + incentive_importer + {FE_TERMS}')
+        m4 = fit_ppml(f4, df, "M4")
+        if m4:
+            print(f"Pseudo-R²: {pseudo_r2(m4):.4f}, N: {int(m4.nobs)}")
+            print_model_results(m4, [
+                'log_dist', 'comlang_off', 'incentive_importer'
+            ] + type_vars_available, "M4")
+    else:
+        print("  SKIPPED - no incentive type variables with variation")
+    sr['M4'] = m4
+
+    # ─────────────────────────────────────────────────────────────────
+    # MODEL 5: Generosity (PPML)
+    # ─────────────────────────────────────────────────────────────────
+
+    print(f"\n{'='*70}")
+    print(f"MODEL 5: Generosity (PPML) - {tag}")
+    print(f"{'='*70}")
+
+    m5 = None
+    if has_generosity:
+        gen_imp_term = (' + generosity_imp' if has_generosity_imp
+                        else ' + incentive_importer')
+        f5 = (f'{PPML_DEP} ~ {FULL_GRAVITY} + '
+              f'generosity_exp{gen_imp_term} + {FE_TERMS}')
+        m5 = fit_ppml(f5, df, "M5")
+        if m5:
+            print(f"Pseudo-R²: {pseudo_r2(m5):.4f}, N: {int(m5.nobs)}")
+            gen_vars = ['generosity_exp']
+            gen_vars.append('generosity_imp' if has_generosity_imp
+                            else 'incentive_importer')
+            print_model_results(m5, gen_vars, "M5")
+
+            # Diagnostic: generosity ranges
+            active_gen = df[df['generosity_exp'] > 0]['generosity_exp']
+            if len(active_gen) > 0:
+                print(f"\n  Generosity exp (active): mean={active_gen.mean()*100:.1f}%, "
+                      f"min={active_gen.min()*100:.1f}%, max={active_gen.max()*100:.1f}%")
+    else:
+        print("  SKIPPED - no generosity data available")
+    sr['M5'] = m5
+
+    # ─────────────────────────────────────────────────────────────────
+    # MODEL 6: Cluster - years active (PPML)
+    # ─────────────────────────────────────────────────────────────────
+
+    print(f"\n{'='*70}")
+    print(f"MODEL 6: Cluster - Years Active (PPML) - {tag}")
+    print(f"{'='*70}")
+
+    # Diagnostic
+    active = df[df['years_active_exp'] > 0]['years_active_exp']
+    if len(active) > 0:
+        print(f"Years active (when >0): mean={active.mean():.1f}, "
+              f"median={active.median():.1f}, max={active.max():.0f}")
+
+    f6 = (f'{PPML_DEP} ~ {FULL_GRAVITY} + '
+          f'incentive_exporter + years_active_exp + incentive_importer + '
+          f'{FE_TERMS}')
+    m6 = fit_ppml(f6, df, "M6")
+    if m6:
+        print(f"Pseudo-R²: {pseudo_r2(m6):.4f}, N: {int(m6.nobs)}")
+        print_model_results(m6, [
+            'incentive_exporter', 'years_active_exp', 'incentive_importer'
+        ], "M6")
+    sr['M6'] = m6
+
+    # ─────────────────────────────────────────────────────────────────
+    # MODEL 7: Cluster - early vs late (PPML)
+    # ─────────────────────────────────────────────────────────────────
+
+    print(f"\n{'='*70}")
+    print(f"MODEL 7: Cluster - Early vs Late (PPML) - {tag}")
+    print(f"{'='*70}")
+
+    print(f"Early adopter obs: {df['early_adopter_exp'].sum():,}")
+    print(f"Late adopter obs:  {df['late_adopter_exp'].sum():,}")
+
+    f7 = (f'{PPML_DEP} ~ {FULL_GRAVITY} + '
+          f'early_adopter_exp + late_adopter_exp + incentive_importer + '
+          f'{FE_TERMS}')
+    m7 = fit_ppml(f7, df, "M7")
+    if m7:
+        print(f"Pseudo-R²: {pseudo_r2(m7):.4f}, N: {int(m7.nobs)}")
+        print_model_results(m7, [
+            'early_adopter_exp', 'late_adopter_exp', 'incentive_importer'
+        ], "M7")
+    sr['M7'] = m7
+
+    # ─────────────────────────────────────────────────────────────────
+    # PREPARE SUBSAMPLES
+    # ─────────────────────────────────────────────────────────────────
+
+    print(f"\n--- Preparing subsamples for pair FE models ---")
+
+    df_excl_aa = df[~((df['exporter'].isin(ANGLO)) &
+                       (df['importer'].isin(ANGLO)))].copy()
+    df_excl_anglo = df[~((df['exporter'].isin(ANGLO)) |
+                          (df['importer'].isin(ANGLO)))].copy()
+    est_vars_no_efw = [OLS_DEP, 'log_gdp_importer', 'log_gdp_exporter',
+                       'log_dist', 'contig', 'comlang_off', 'col45',
+                       'rta', 'remoteness_importer', 'remoteness_exporter',
+                       'incentive_exporter', 'incentive_importer']
+    df_no_efw = merged.dropna(subset=est_vars_no_efw).copy()
+
+    print(f"  Full sample:         {len(df):,}")
+    print(f"  Excl Anglo-to-Anglo: {len(df_excl_aa):,}")
+    print(f"  Excl all Anglo:      {len(df_excl_anglo):,}")
+    print(f"  No EFW (merged):     {len(df_no_efw):,}")
+
+    subsamples = [
+        ('Full sample', df, TV_FULL),
+        ('Excl Anglo-to-Anglo', df_excl_aa, TV_FULL),
+        ('Excl all Anglo', df_excl_anglo, TV_FULL),
+        ('No EFW', df_no_efw, TV_NO_EFW),
+    ]
+
+    # ─────────────────────────────────────────────────────────────────
+    # MODEL 8: Pair FE (OLS) — all subsamples
+    # ─────────────────────────────────────────────────────────────────
+
+    print(f"\n\n{'#'*70}")
+    print(f"# MODEL 8: Incentive Dummies - Pair FE (OLS) - {tag}")
+    print(f"{'#'*70}")
+
+    m8_results = {}
+    for ss_name, ss_df, ss_tv in subsamples:
+        m8_results[ss_name] = run_pair_fe(
+            ss_df, OLS_DEP, ss_tv,
+            f'M8 {tag} - {ss_name}')
+    sr['M8'] = m8_results
+
+    # ─────────────────────────────────────────────────────────────────
+    # MODEL 9: Event study (OLS) — all subsamples
+    # ─────────────────────────────────────────────────────────────────
+
+    print(f"\n\n{'#'*70}")
+    print(f"# MODEL 9: Event Study - Pair FE (OLS) - {tag}")
+    print(f"{'#'*70}")
+
+    m9_results = {}
+    for ss_name, ss_df, ss_tv in subsamples:
+        m9_results[ss_name] = run_event_study(
+            ss_df, OLS_DEP, ss_tv,
+            f'M9 {tag} - {ss_name}')
+    sr['M9'] = m9_results
+
+    # ─────────────────────────────────────────────────────────────────
+    # MODEL 10: Cluster pair FE (OLS) — all subsamples
+    # ─────────────────────────────────────────────────────────────────
+
+    print(f"\n\n{'#'*70}")
+    print(f"# MODEL 10: Cluster Years Active - Pair FE (OLS) - {tag}")
+    print(f"{'#'*70}")
+
+    TV_FULL_CLUSTER = TV_FULL + ['years_active_exp']
+    TV_NO_EFW_CLUSTER = TV_NO_EFW + ['years_active_exp']
+
+    subsamples_m10 = [
+        ('Full sample', df, TV_FULL_CLUSTER),
+        ('Excl Anglo-to-Anglo', df_excl_aa, TV_FULL_CLUSTER),
+        ('Excl all Anglo', df_excl_anglo, TV_FULL_CLUSTER),
+        ('No EFW', df_no_efw, TV_NO_EFW_CLUSTER),
+    ]
+
+    m10_results = {}
+    for ss_name, ss_df, ss_tv in subsamples_m10:
+        m10_results[ss_name] = run_pair_fe(
+            ss_df, OLS_DEP, ss_tv,
+            f'M10 {tag} - {ss_name}')
+    sr['M10'] = m10_results
+
+    # ─────────────────────────────────────────────────────────────────
+    # SUMMARY TABLE
+    # ─────────────────────────────────────────────────────────────────
+
+    print(f"\n\n{'='*70}")
+    print(f"SUMMARY: INCENTIVE EFFECTS - {tag}")
+    print(f"{'='*70}")
+
+    # --- Overall incentive effects ---
+    print(f"\n--- OVERALL INCENTIVE ---")
+    print(f"\n{'Specification':<40} {'inc_exp':>15} {'inc_imp':>15}")
+    print("-" * 72)
+
+    for mname in ['M3', 'M6']:
+        m = sr.get(mname)
+        if m:
+            print(f"{mname + ' (PPML)':<40}"
+                  f"{fmt_coef(m, 'incentive_exporter'):>15}"
+                  f"{fmt_coef(m, 'incentive_importer'):>15}")
+
+    for mname in ['M8', 'M10']:
+        mr = sr.get(mname, {})
+        for ss_name, model in mr.items():
+            if model is None:
+                continue
+            lab = f"{mname} Pair FE ({ss_name})"[:40]
+            print(f"{lab:<40}"
+                  f"{fmt_coef(model, 'incentive_exporter'):>15}"
+                  f"{fmt_coef(model, 'incentive_importer'):>15}")
+
+    # --- Incentive types ---
+    print(f"\n--- INCENTIVE TYPES ---")
+    type_display = ['is_refundable_credit_exp',
+                    'is_transferable_credit_exp',
+                    'is_standard_credit_exp',
+                    'is_cash_rebate_exp']
+    print(f"\n{'Specification':<25}", end="")
+    for tv in type_display:
+        short = (tv.replace('is_', '').replace('_exp', '')
+                 .replace('_credit', '').replace('_', ' '))
+        print(f"{short:>18}", end="")
+    print()
+    print("-" * (25 + 18 * len(type_display)))
+
+    if sr.get('M4'):
+        row = f"{'M4 (PPML)':<25}"
+        for tv in type_display:
+            row += fmt_coef(sr['M4'], tv).rjust(18)
+        print(row)
+
+    # --- Early vs late ---
+    print(f"\n--- EARLY vs LATE ADOPTERS ---")
+    print(f"{'Specification':<25} {'early':>18} {'late':>18} {'imp':>18}")
+    print("-" * 79)
+    if sr.get('M7'):
+        print(f"{'M7 (PPML)':<25}"
+              f"{fmt_coef(sr['M7'], 'early_adopter_exp'):>18}"
+              f"{fmt_coef(sr['M7'], 'late_adopter_exp'):>18}"
+              f"{fmt_coef(sr['M7'], 'incentive_importer'):>18}")
+
+    # --- Generosity ---
+    print(f"\n--- GENEROSITY ---")
+    if sr.get('M5'):
+        gen_imp_var = ('generosity_imp' if has_generosity_imp
+                       else 'incentive_importer')
+        print(f"{'M5 (PPML)':<25}"
+              f"{fmt_coef(sr['M5'], 'generosity_exp'):>18}"
+              f"{fmt_coef(sr['M5'], gen_imp_var):>18}")
+
+    print(f"\n* p<0.1, ** p<0.05, *** p<0.01")
+    print(f"PPML: estimated on levels, coefficients = semi-elasticities")
+    print(f"OLS pair FE: within-transformation on log dep var")
+
+    all_results[efw_key] = sr
 
 
 # =============================================================================
-# PHASE 4: COUNTRY-PAIR + YEAR FE
-# =============================================================================
-
-time_varying = [
-    'log_gdp_importer', 'log_gdp_exporter',
-    'remoteness_importer', 'remoteness_exporter',
-    'efw_importer', 'efw_exporter',
-    'rta', 'incentive_exporter', 'incentive_importer'
-]
-tv_no_efw = [v for v in time_varying if v not in ['efw_importer', 'efw_exporter']]
-
-pair_fe_results = {}
-
-pair_fe_results['Full sample'] = run_pair_fe(df, 'log_trade', time_varying, 'Full sample')
-
-est_no_efw = ['log_trade', 'log_gdp_importer', 'log_gdp_exporter',
-              'log_dist', 'contig', 'comlang_off', 'col45',
-              'rta', 'remoteness_importer', 'remoteness_exporter',
-              'incentive_exporter', 'incentive_importer']
-df_no_efw = merged.dropna(subset=est_no_efw).copy()
-pair_fe_results['Full (no EFW)'] = run_pair_fe(df_no_efw, 'log_trade', tv_no_efw, 'Full (no EFW)')
-
-df_naa = df[~((df['exporter'].isin(ANGLO)) & (df['importer'].isin(ANGLO)))].copy()
-pair_fe_results['Excl Anglo-to-Anglo'] = run_pair_fe(df_naa, 'log_trade', time_varying, 'Excl Anglo-to-Anglo')
-
-df_nax = df[~((df['exporter'].isin(ANGLO)) | (df['importer'].isin(ANGLO)))].copy()
-pair_fe_results['Excl all Anglo'] = run_pair_fe(df_nax, 'log_trade', time_varying, 'Excl all Anglo')
-
-# Types
-tv_types = [v for v in time_varying if v != 'incentive_exporter']
-type_vars_avail = [v for v in type_dummy_vars if v in df.columns and df[v].nunique() > 1]
-tv_types = tv_types + type_vars_avail
-pair_fe_results['Types (full sample)'] = run_pair_fe(df, 'log_trade', tv_types, 'Incentive Types')
-
-# Generosity
-if has_generosity:
-    tv_gen = [v for v in time_varying if v != 'incentive_exporter'] + ['generosity_exp']
-    pair_fe_results['Generosity (full sample)'] = run_pair_fe(df, 'log_trade', tv_gen, 'Generosity')
-
-
-# =============================================================================
-# PHASE 5: EVENT STUDY
+# FINAL SUMMARY
 # =============================================================================
 
 print(f"\n\n{'='*70}")
-print("PHASE 5: EVENT STUDY")
-print(f"{'='*70}")
-
-df_ev = df[df['exporter'].map(incentive_dict).notna()].copy()
-df_ev['intro_year_exp'] = df_ev['exporter'].map(incentive_dict)
-df_ev['rel_year'] = (df_ev['year'] - df_ev['intro_year_exp']).astype(int)
-df_ev = df_ev[(df_ev['rel_year'] >= EVENT_WINDOW_MIN) & (df_ev['rel_year'] <= EVENT_WINDOW_MAX)].copy()
-
-print(f"Sample: {len(df_ev):,} obs, {df_ev['exporter'].nunique()} exporters with incentive")
-
-for t in range(EVENT_WINDOW_MIN, EVENT_WINDOW_MAX + 1):
-    if t != -1:
-        df_ev[f'rel_t{t}'] = (df_ev['rel_year'] == t).astype(int)
-
-df_ev['pair_id'] = df_ev['exporter'] + '_' + df_ev['importer']
-pc = df_ev.groupby('pair_id').size()
-df_ev = df_ev[df_ev['pair_id'].isin(pc[pc > 1].index)].copy()
-print(f"After dropping singletons: {len(df_ev):,} obs, {df_ev['pair_id'].nunique()} pairs")
-
-controls = ['log_gdp_importer', 'log_gdp_exporter', 'remoteness_importer', 'remoteness_exporter',
-            'efw_importer', 'efw_exporter', 'rta']
-rel_vars = [f'rel_t{t}' for t in range(EVENT_WINDOW_MIN, EVENT_WINDOW_MAX + 1) if t != -1]
-
-all_ev_vars = ['log_trade'] + controls + rel_vars
-df_dm_ev = df_ev.copy()
-pm_ev = df_ev.groupby('pair_id')[all_ev_vars].transform('mean')
-for var in all_ev_vars:
-    df_dm_ev[f'{var}_dm'] = df_ev[var] - pm_ev[var]
-
-year_dummies = pd.get_dummies(df_dm_ev['year'], prefix='yr', drop_first=True, dtype=float)
-X = pd.concat([df_dm_ev[[f'{v}_dm' for v in controls + rel_vars]], year_dummies], axis=1)
-y = df_dm_ev['log_trade_dm']
-
-m_ev = sm.OLS(y, X).fit(cov_type='HC1')
-
-print(f"\n{'Rel Year':>10} {'Coef':>10} {'SE':>10} {'95% CI':>22} {'Sig':>5}")
-print("-" * 60)
-
-event_coefs = []
-for t in range(EVENT_WINDOW_MIN, EVENT_WINDOW_MAX + 1):
-    if t == -1:
-        event_coefs.append((t, 0, 0, 0, 0))
-        print(f"{'t-1':>10} {'0.000':>10} {'(ref)':>10}")
-        continue
-    dm_var = f'rel_t{t}_dm'
-    if dm_var in m_ev.params:
-        coef = m_ev.params[dm_var]
-        se = m_ev.bse[dm_var]
-        p = m_ev.pvalues[dm_var]
-        ci_lo, ci_hi = coef - 1.96*se, coef + 1.96*se
-        stars = "***" if p < 0.01 else "**" if p < 0.05 else "*" if p < 0.1 else ""
-        event_coefs.append((t, coef, se, ci_lo, ci_hi))
-        print(f"{'t'+format(t,'+d'):>10} {coef:>10.4f} {se:>10.4f} [{ci_lo:>8.4f}, {ci_hi:>8.4f}] {stars:>5}")
-
-pre_coefs = [c for t, c, s, lo, hi in event_coefs if EVENT_WINDOW_MIN <= t < -1]
-post_coefs = [c for t, c, s, lo, hi in event_coefs if t >= 0]
-if pre_coefs and post_coefs:
-    print(f"\n  Avg pre-treatment (t-5 to t-2): {np.mean(pre_coefs):.4f}")
-    print(f"  Avg post-treatment (t0 to t+10): {np.mean(post_coefs):.4f}")
-
-
-# =============================================================================
-# PHASE 6: CLUSTER EFFECTS
-# =============================================================================
-
-print(f"\n\n{'='*70}")
-print("PHASE 6: CLUSTER EFFECTS")
-print(f"{'='*70}")
-
-df_cl = df.copy()
-df_cl['intro_year_exp'] = df_cl['exporter'].map(incentive_dict)
-df_cl['years_active_exp'] = np.where(
-    (df_cl['incentive_exporter'] == 1) & df_cl['intro_year_exp'].notna(),
-    np.minimum(df_cl['year'] - df_cl['intro_year_exp'], MAX_YEARS_ACTIVE), 0
-)
-
-# Model A: Year FE
-print(f"\n--- Years Active (Year FE) ---")
-try:
-    f_a = ('log_trade ~ log_gdp_importer + log_gdp_exporter + log_dist + '
-           'contig + comlang_off + col45 + remoteness_importer + remoteness_exporter + '
-           'rta + efw_importer + efw_exporter + '
-           'incentive_exporter + years_active_exp + incentive_importer + C(year)')
-    m_a = smf.ols(f_a, data=df_cl).fit(cov_type='HC1')
-    for var in ['incentive_exporter', 'years_active_exp', 'incentive_importer']:
-        if var in m_a.params:
-            stars = "***" if m_a.pvalues[var] < 0.01 else "**" if m_a.pvalues[var] < 0.05 else "*" if m_a.pvalues[var] < 0.1 else ""
-            print(f"  {var:<25} {m_a.params[var]:>8.4f} ({m_a.bse[var]:.4f}) {stars}")
-except (MemoryError, np.linalg.LinAlgError) as e:
-    print(f"  SKIPPED — {type(e).__name__}")
-
-# Model B: Pair FE with years_active
-print(f"\n--- Years Active (Pair FE) ---")
-df_cl['pair_id'] = df_cl['exporter'] + '_' + df_cl['importer']
-pc = df_cl.groupby('pair_id').size()
-df_cl_panel = df_cl[df_cl['pair_id'].isin(pc[pc > 1].index)].copy()
-
-tv_cl = ['log_gdp_importer', 'log_gdp_exporter', 'remoteness_importer', 'remoteness_exporter',
-         'efw_importer', 'efw_exporter', 'rta', 'incentive_exporter', 'years_active_exp', 'incentive_importer']
-
-demean_cl = ['log_trade'] + tv_cl
-df_dm_cl = df_cl_panel.copy()
-pm_cl = df_cl_panel.groupby('pair_id')[demean_cl].transform('mean')
-for var in demean_cl:
-    df_dm_cl[f'{var}_dm'] = df_cl_panel[var] - pm_cl[var]
-
-m_b = smf.ols('log_trade_dm ~ ' + ' + '.join([f'{v}_dm' for v in tv_cl]) + ' + C(year) - 1',
-              data=df_dm_cl).fit(cov_type='HC1')
-
-for var in tv_cl:
-    dm_var = f'{var}_dm'
-    if dm_var in m_b.params:
-        stars = "***" if m_b.pvalues[dm_var] < 0.01 else "**" if m_b.pvalues[dm_var] < 0.05 else "*" if m_b.pvalues[dm_var] < 0.1 else ""
-        print(f"  {var:<25} {m_b.params[dm_var]:>8.4f} ({m_b.bse[dm_var]:.4f}) {stars}")
-
-if 'years_active_exp_dm' in m_b.params:
-    ya = m_b.params['years_active_exp_dm']
-    ya_p = m_b.pvalues['years_active_exp_dm']
-    print(f"\n  Cluster test: years_active = {ya:.4f} (p={ya_p:.4f})")
-
-# Model C: Early vs late adopters
-print(f"\n--- Early vs Late Adopters (Pair FE) ---")
-df_cl_panel['early_adopter_exp'] = df_cl_panel.apply(
-    lambda row: (1 if (row['exporter'] in incentive_dict
-                      and pd.notna(incentive_dict[row['exporter']])
-                      and incentive_dict[row['exporter']] < EARLY_CUTOFF
-                      and row['year'] >= incentive_dict[row['exporter']]) else 0), axis=1
-)
-df_cl_panel['late_adopter_exp'] = df_cl_panel.apply(
-    lambda row: (1 if (row['exporter'] in incentive_dict
-                      and pd.notna(incentive_dict[row['exporter']])
-                      and incentive_dict[row['exporter']] >= EARLY_CUTOFF
-                      and row['year'] >= incentive_dict[row['exporter']]) else 0), axis=1
-)
-
-print(f"  Early adopter obs: {df_cl_panel['early_adopter_exp'].sum()}")
-print(f"  Late adopter obs: {df_cl_panel['late_adopter_exp'].sum()}")
-
-tv_ad = ['log_gdp_importer', 'log_gdp_exporter', 'remoteness_importer', 'remoteness_exporter',
-         'efw_importer', 'efw_exporter', 'rta', 'early_adopter_exp', 'late_adopter_exp', 'incentive_importer']
-
-demean_ad = ['log_trade'] + tv_ad
-df_dm_ad = df_cl_panel.copy()
-pm_ad = df_cl_panel.groupby('pair_id')[demean_ad].transform('mean')
-for var in demean_ad:
-    df_dm_ad[f'{var}_dm'] = df_cl_panel[var] - pm_ad[var]
-
-m_c = smf.ols('log_trade_dm ~ ' + ' + '.join([f'{v}_dm' for v in tv_ad]) + ' + C(year) - 1',
-              data=df_dm_ad).fit(cov_type='HC1')
-
-for var in ['early_adopter_exp', 'late_adopter_exp', 'incentive_importer']:
-    dm_var = f'{var}_dm'
-    if dm_var in m_c.params:
-        coef = m_c.params[dm_var]
-        se = m_c.bse[dm_var]
-        p = m_c.pvalues[dm_var]
-        stars = "***" if p < 0.01 else "**" if p < 0.05 else "*" if p < 0.1 else ""
-        pct = (np.exp(coef) - 1) * 100
-        print(f"  {var:<25} {coef:>8.4f} ({se:.4f}) {stars}  [{pct:+.1f}%]")
-
-
-# =============================================================================
-# PHASE 7: SUMMARY
-# =============================================================================
-
-print(f"\n\n{'='*70}")
-print("SUMMARY: INCENTIVE EFFECTS ACROSS SPECIFICATIONS")
-print(f"{'='*70}")
-
-print(f"\n--- OVERALL INCENTIVE ---")
-print(f"\n{'Specification':<35} {'inc_exporter':>15} {'inc_importer':>15}")
-print("-" * 67)
-
-m7 = get_model_by_name(all_models, 'M7')
-if m7:
-    print(f"{'M7 (Year FE)':<35}{extract_incentive_coef(m7, 'incentive_exporter'):>15}"
-          f"{extract_incentive_coef(m7, 'incentive_importer'):>15}")
-
-if m_fe is not None:
-    print(f"{'Imp+Exp+Year FE':<35}{extract_incentive_coef(m_fe, 'incentive_exporter'):>15}"
-          f"{extract_incentive_coef(m_fe, 'incentive_importer'):>15}")
-
-for sname, model in pair_fe_results.items():
-    lab = f"Pair+Year FE ({sname})"[:35]
-    print(f"{lab:<35}{extract_incentive_coef(model, 'incentive_exporter'):>15}"
-          f"{extract_incentive_coef(model, 'incentive_importer'):>15}")
-
-# Types
-print(f"\n--- INCENTIVE TYPES ---")
-type_summary_vars = ['is_refundable_credit_exp', 'is_transferable_credit_exp',
-                     'is_standard_credit_exp', 'is_cash_rebate_exp']
-
-print(f"\n{'Specification':<25}", end="")
-for tv in type_summary_vars:
-    short = tv.replace('is_', '').replace('_exp', '').replace('_credit', '').replace('_', ' ')
-    print(f"{short:>18}", end="")
-print()
-print("-" * (25 + 18 * len(type_summary_vars)))
-
-m8 = get_model_by_name(all_models, 'M8')
-if m8:
-    row = f"{'M8 (Year FE)':<25}"
-    for tv in type_summary_vars:
-        row += extract_incentive_coef(m8, tv).rjust(18)
-    print(row)
-
-if m_fe_types is not None:
-    row = f"{'Imp+Exp+Year FE (Types)':<25}"
-    for tv in type_summary_vars:
-        row += extract_incentive_coef(m_fe_types, tv).rjust(18)
-    print(row)
-
-if 'Types (full sample)' in pair_fe_results:
-    row = f"{'Pair+Year FE (Types)':<25}"
-    for tv in type_summary_vars:
-        row += extract_incentive_coef(pair_fe_results['Types (full sample)'], tv).rjust(18)
-    print(row)
-
-# Generosity
-m9 = get_model_by_name(all_models, 'M9')
-if m9 or 'Generosity (full sample)' in pair_fe_results:
-    print(f"\n{'Specification':<25} {'generosity':>18}")
-    print("-" * 43)
-    if m9:
-        print(f"{'M9 (Year FE)':<25}{extract_incentive_coef(m9, 'generosity_exp'):>18}")
-    if 'Generosity (full sample)' in pair_fe_results:
-        print(f"{'Pair+Year FE (Gen)':<25}{extract_incentive_coef(pair_fe_results['Generosity (full sample)'], 'generosity_exp'):>18}")
-
-print(f"\n* p<0.1, ** p<0.05, *** p<0.01")
-print("\n" + "=" * 70)
 print("ANALYSIS COMPLETE")
-print("=" * 70)
+print(f"{'='*70}")
+
+for efw_key, sr in all_results.items():
+    efw_label = EFW_VARIANTS[efw_key]['label']
+    n_estimated = sum(1 for k, v in sr.items()
+                      if v is not None and not isinstance(v, dict))
+    n_pair_fe = sum(1 for k, v in sr.items()
+                    if isinstance(v, dict)
+                    for _, m in v.items() if m is not None)
+    print(f"  BaTIS [{efw_label}]: {n_estimated} PPML models, "
+          f"{n_pair_fe} pair FE specifications estimated")

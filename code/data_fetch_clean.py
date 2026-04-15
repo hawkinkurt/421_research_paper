@@ -9,23 +9,27 @@ organised in sequential phases:
 
   PHASE 1:  Fetch World Bank GDP and CPI data via API
   PHASE 2:  Fetch and process IMDb filming location data via Kaggle
-  PHASE 3:  Pre-filter BaTIS SK1/SK2 audiovisual services trade data
+  PHASE 3:  Pre-filter BaTIS SK1 audiovisual services trade data
   PHASE 4:  Clean CEPII gravity/distance variables
   PHASE 5:  Clean GDP data (country names → ISO2, log transform)
   PHASE 6:  Clean Economic Freedom of the World (EFW) data
   PHASE 7:  Prepare BaTIS SK1 gravity analysis dataset (merge all variables)
+  PHASE 8:  Prepare IMDb gravity analysis dataset (merge all variables)
 
 Each phase can be toggled on/off via the RUN_PHASE flags below.
 
 Outputs:
-  Phase 1: data/raw/world_bank_gdp.csv, data/raw/world_bank_cpi.csv
+  Phase 1: data/raw/world_bank_gdp.csv, data/raw/world_bank_gdp_constant.csv,
+           data/raw/world_bank_cpi.csv
   Phase 2: data/processed/imdb/*.csv (stages 1-5 + final bilateral flows)
-  Phase 3: data/raw/base/batis_sk1_all_years.csv, batis_sk2_all_years.csv
+  Phase 3: data/raw/base/batis_sk1_all_years.csv
   Phase 4: data/processed/gravity_vars_cepii.csv
   Phase 5: data/processed/gdp_cleaned.csv
   Phase 6: data/processed/efw_cleaned.csv
   Phase 7: data/processed/batis_sk1_gravity_analysis.csv,
            data/processed/batis_sk1_gravity_merged.csv
+  Phase 8: data/processed/imdb/imdb_gravity_analysis.csv,
+           data/processed/imdb/imdb_gravity_merged.csv
 """
 
 import os
@@ -50,13 +54,14 @@ RUN_PHASE_4_CEPII = True          # Clean CEPII distance/gravity data
 RUN_PHASE_5_GDP = True            # Clean GDP data
 RUN_PHASE_6_EFW = True            # Clean EFW data
 RUN_PHASE_7_BATIS_PREP = True     # Merge BaTIS with all variables
+RUN_PHASE_8_IMDB_PREP = True      # Merge IMDb with all variables
 
 # Year ranges
 YEAR_MIN = 1990
 YEAR_MAX_IMDB = 2023
 YEAR_MAX_BATIS = 2023
 CPI_BASE_YEAR_IMDB = 2010
-CPI_BASE_YEAR_BATIS = 2018
+CPI_BASE_YEAR_BATIS = 2010
 
 
 # =============================================================================
@@ -176,7 +181,7 @@ def safe_parse_list(val):
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 
 def phase_1_fetch_world_bank():
-    """Download World Bank GDP and CPI data via wbdata API."""
+    """Download World Bank GDP (nominal + constant) and CPI data via wbdata API."""
     import wbdata
     from datetime import datetime
 
@@ -184,19 +189,32 @@ def phase_1_fetch_world_bank():
     print("PHASE 1: FETCH WORLD BANK GDP AND CPI DATA")
     print("=" * 70)
 
-    # --- GDP ---
+    start_date = datetime(1990, 1, 1)
+    end_date = datetime(2023, 12, 31)
+
+    # --- GDP (current USD) — kept for reference/remoteness if needed ---
     gdp_filepath = f"{PROJECT_DIR}/data/raw/world_bank_gdp.csv"
     if os.path.exists(gdp_filepath):
-        print("GDP data file already exists, skipping download")
+        print("GDP (current USD) data file already exists, skipping download")
     else:
-        print("Downloading GDP data...")
-        start_date = datetime(1990, 1, 1)
-        end_date = datetime(2023, 12, 31)
+        print("Downloading GDP (current USD) data...")
         indicators = {"NY.GDP.MKTP.CD": "gdp"}
         df = wbdata.get_dataframe(indicators, date=(start_date, end_date))
         df = df.reset_index()
         df.to_csv(gdp_filepath, index=False)
-        print(f"GDP data saved to {gdp_filepath}")
+        print(f"GDP (current USD) saved to {gdp_filepath}")
+
+    # --- GDP (constant 2015 USD) — primary GDP measure for gravity model ---
+    gdp_const_filepath = f"{PROJECT_DIR}/data/raw/world_bank_gdp_constant.csv"
+    if os.path.exists(gdp_const_filepath):
+        print("GDP (constant 2015 USD) data file already exists, skipping download")
+    else:
+        print("Downloading GDP (constant 2015 USD) data...")
+        indicators = {"NY.GDP.MKTP.KD": "gdp"}
+        df = wbdata.get_dataframe(indicators, date=(start_date, end_date))
+        df = df.reset_index()
+        df.to_csv(gdp_const_filepath, index=False)
+        print(f"GDP (constant 2015 USD) saved to {gdp_const_filepath}")
 
     # --- CPI ---
     cpi_filepath = f"{PROJECT_DIR}/data/raw/world_bank_cpi.csv"
@@ -204,8 +222,6 @@ def phase_1_fetch_world_bank():
         print("CPI data file already exists, skipping download")
     else:
         print("Downloading CPI data...")
-        start_date = datetime(1990, 1, 1)
-        end_date = datetime(2023, 12, 31)
         indicators = {"FP.CPI.TOTL": "cpi"}
         countries = ["USA"]
         df_cpi = wbdata.get_dataframe(indicators, country=countries, date=(start_date, end_date))
@@ -461,7 +477,7 @@ def phase_2_imdb():
     # --- 2g: Deflate budgets to constant 2010 USD ---
     print("\n--- 2g: Deflate budgets (US CPI, base year 2010) ---")
 
-    CPI_FILE = f'{PROJECT_DIR}\\data\\raw\\us_cpi.csv'
+    CPI_FILE = f'{PROJECT_DIR}\\data\\raw\\world_bank_cpi.csv'
     try:
         cpi = pd.read_csv(CPI_FILE)
         print(f"Loaded CPI data: {len(cpi)} rows")
@@ -524,6 +540,15 @@ def phase_2_imdb():
             skipped_no_origin += 1
             continue
 
+        # Count non-domestic origins to divide budget equally across them
+        foreign_origins = [o for o in origins if o != filming]
+        n_foreign = len(foreign_origins)
+        if n_foreign == 0:
+            skipped_domestic += len(origins)
+            continue
+
+        budget_share = budget / n_foreign if pd.notna(budget) else np.nan
+
         for origin in origins:
             if origin == filming:
                 skipped_domestic += 1
@@ -533,7 +558,7 @@ def phase_2_imdb():
                 'importer': origin,
                 'exporter': filming,
                 'film_count': 1,
-                'budget_usd': budget,
+                'budget_usd': budget_share,
                 'title': row.get('Title', '')
             })
 
@@ -597,14 +622,14 @@ def phase_2_imdb():
 
 
 # ╔═══════════════════════════════════════════════════════════════════════════╗
-# ║  PHASE 3: PRE-FILTER BaTIS SK1/SK2                                     ║
+# ║  PHASE 3: PRE-FILTER BaTIS SK1                                     ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 
 def phase_3_batis_prefilter():
-    """Extract SK1 and SK2 audiovisual services from full BaTIS bulk CSV."""
+    """Extract SK1 audiovisual services from full BaTIS bulk CSV."""
 
     print("\n" + "=" * 70)
-    print("PHASE 3: PRE-FILTER BaTIS SK1/SK2")
+    print("PHASE 3: PRE-FILTER BaTIS SK1")
     print("=" * 70)
 
     batis_bulk_file = (
@@ -613,8 +638,7 @@ def phase_3_batis_prefilter():
     )
     chunk_size = 1_000_000
 
-    for item_code, label in [('SK1', 'Audiovisual and related services'),
-                              ('SK2', 'Other personal, cultural, recreational services')]:
+    for item_code, label in [('SK1', 'Audiovisual and related services')]:
         print(f"\n--- {item_code}: {label} ---")
         chunks = []
         for chunk in pd.read_csv(batis_bulk_file, chunksize=chunk_size):
@@ -666,9 +690,9 @@ def phase_4_cepii():
     )
     print(f"Loaded: {len(df):,} observations")
 
-    # Filter to 1990-2018
-    df = df[(df['year'] >= 1990) & (df['year'] <= 2018)]
-    print(f"After filtering to 1990-2018: {len(df):,} observations")
+    # Filter to 1990-2020
+    df = df[(df['year'] >= 1990) & (df['year'] <= 2020)]
+    print(f"After filtering to 1990-2020: {len(df):,} observations")
 
     # Convert ISO3 → ISO2
     print("Converting ISO3 to ISO2 codes...")
@@ -735,13 +759,25 @@ def phase_4_cepii():
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 
 def phase_5_gdp():
-    """Clean World Bank GDP: remove aggregates, convert names to ISO2, log transform."""
+    """Clean World Bank GDP (constant 2015 USD): remove aggregates, convert names to ISO2, log transform."""
 
     print("\n" + "=" * 70)
-    print("PHASE 5: CLEAN GDP DATA")
+    print("PHASE 5: CLEAN GDP DATA (constant 2015 USD)")
     print("=" * 70)
 
-    df = pd.read_csv(f"{PROJECT_DIR}/data/raw/world_bank_gdp.csv")
+    # Use constant-dollar GDP series as primary
+    gdp_const_filepath = f"{PROJECT_DIR}/data/raw/world_bank_gdp_constant.csv"
+    gdp_nominal_filepath = f"{PROJECT_DIR}/data/raw/world_bank_gdp.csv"
+
+    if os.path.exists(gdp_const_filepath):
+        print("Using constant 2015 USD GDP (NY.GDP.MKTP.KD)")
+        df = pd.read_csv(gdp_const_filepath)
+    else:
+        print("WARNING: Constant GDP file not found, falling back to nominal GDP")
+        print(f"  Expected: {gdp_const_filepath}")
+        print(f"  Run Phase 1 first to download constant GDP data")
+        df = pd.read_csv(gdp_nominal_filepath)
+
     print(f"Loaded: {len(df)} observations")
     print(f"Missing GDP: {df['gdp'].isnull().sum()}, Zero/negative: {(df['gdp'] <= 0).sum()}")
 
@@ -780,7 +816,7 @@ def phase_5_gdp():
     df['log_gdp'] = np.log(df['gdp'])
 
     # Summary
-    print(f"\n=== Final GDP Dataset ===")
+    print(f"\n=== Final GDP Dataset (constant 2015 USD) ===")
     print(f"Observations: {len(df)}")
     print(f"Countries: {df['country'].nunique()}")
     print(f"Year range: {df['date'].min()} - {df['date'].max()}")
@@ -812,9 +848,9 @@ def phase_6_efw():
     df = df[['Year', 'ISO_Code', 'Countries', 'ECONOMIC FREEDOM ALL AREAS']].copy()
     df.columns = ['year', 'iso3', 'country_name', 'efw']
 
-    # Filter to 1990-2018
-    df = df[(df['year'] >= 1990) & (df['year'] <= 2018)]
-    print(f"After filtering to 1990-2018: {len(df)} observations")
+    # Filter to 1990-2023 (raw data goes to 2025; cap at analysis period)
+    df = df[(df['year'] >= 1990) & (df['year'] <= 2023)]
+    print(f"After filtering to 1990-2023: {len(df)} observations")
 
     # Convert ISO3 → ISO2
     df['iso2'] = df['iso3'].apply(iso3_to_iso2)
@@ -845,7 +881,7 @@ def phase_6_efw():
     df_final.columns = ['year', 'country', 'efw']
 
     countries = df_final['country'].unique()
-    all_years = list(range(1990, 2019))
+    all_years = list(range(1990, 2024))
 
     full_grid = pd.DataFrame([
         {'country': c, 'year': y}
@@ -999,7 +1035,7 @@ def phase_7_batis_prep():
         'Balanced_value': 'trade_value_nominal'
     })
 
-    # Deflate to constant 2018 USD
+    # Deflate to constant 2010 USD
     base_cpi = cpi[cpi['year'] == CPI_BASE_YEAR_BATIS]['cpi'].values[0]
     cpi_adj = cpi[['year', 'cpi']].copy()
     cpi_adj['adjustment_factor'] = base_cpi / cpi_adj['cpi']
@@ -1070,6 +1106,59 @@ def phase_7_batis_prep():
     print(f"Missing exporter EFW: {merged['efw_exporter'].isna().sum()} "
           f"({merged['efw_exporter'].isna().mean()*100:.1f}%)")
 
+
+    # --- 7e2: Create income-adjusted EFW (EFWRESID) ---
+    print("\n--- 7e2: Create income-adjusted EFW (EFWRESID, pooled OLS) ---")
+
+    import statsmodels.api as sm_ols
+
+    # Pooled regression: EFW = alpha + beta * ln(GDP) + epsilon
+    # Residual = EFW component orthogonal to income (Kimura & Lee, 2006)
+    # Collapse to unique country-year observations before regression
+    # to avoid weighting countries by their bilateral pair frequency.
+
+    # Exporter side: collapse to unique (exporter, year) observations
+    exp_cy = (merged[['exporter', 'year', 'efw_exporter', 'log_gdp_exporter']]
+              .drop_duplicates(subset=['exporter', 'year'])
+              .dropna(subset=['efw_exporter', 'log_gdp_exporter']))
+    if len(exp_cy) > 50:
+        X_exp = sm_ols.add_constant(exp_cy['log_gdp_exporter'])
+        res_exp = sm_ols.OLS(exp_cy['efw_exporter'].values, X_exp).fit()
+        exp_cy = exp_cy.copy()
+        exp_cy['efwresid_exporter'] = res_exp.resid
+        print(f"  Exporter EFWRESID: N={int(res_exp.nobs)} unique country-years, "
+              f"R2={res_exp.rsquared:.4f}, beta(ln GDP)={res_exp.params.iloc[1]:.4f}")
+        merged = merged.merge(
+            exp_cy[['exporter', 'year', 'efwresid_exporter']],
+            on=['exporter', 'year'], how='left'
+        )
+    else:
+        merged['efwresid_exporter'] = np.nan
+        print("  WARNING: too few obs for exporter EFWRESID regression")
+
+    # Importer side: collapse to unique (importer, year) observations
+    imp_cy = (merged[['importer', 'year', 'efw_importer', 'log_gdp_importer']]
+              .drop_duplicates(subset=['importer', 'year'])
+              .dropna(subset=['efw_importer', 'log_gdp_importer']))
+    if len(imp_cy) > 50:
+        X_imp = sm_ols.add_constant(imp_cy['log_gdp_importer'])
+        res_imp = sm_ols.OLS(imp_cy['efw_importer'].values, X_imp).fit()
+        imp_cy = imp_cy.copy()
+        imp_cy['efwresid_importer'] = res_imp.resid
+        print(f"  Importer EFWRESID: N={int(res_imp.nobs)} unique country-years, "
+              f"R2={res_imp.rsquared:.4f}, beta(ln GDP)={res_imp.params.iloc[1]:.4f}")
+        merged = merged.merge(
+            imp_cy[['importer', 'year', 'efwresid_importer']],
+            on=['importer', 'year'], how='left'
+        )
+    else:
+        merged['efwresid_importer'] = np.nan
+        print("  WARNING: too few obs for importer EFWRESID regression")
+
+    n_resid = merged['efwresid_exporter'].notna().sum()
+    print(f"  EFWRESID coverage: {n_resid:,} / {len(merged):,} "
+          f"({n_resid/len(merged)*100:.1f}%)")
+
     # --- 7f: Create incentive variables ---
     print("\n--- 7f: Create incentive variables ---")
 
@@ -1112,6 +1201,20 @@ def phase_7_batis_prep():
         )
     else:
         merged['generosity_exp'] = 0
+
+    # Generosity (importer)
+    if has_generosity:
+        merged['generosity_imp'] = merged.apply(
+            lambda row: (
+                generosity_dict.get(row['importer'], 0)
+                if (row['importer'] in incentive_dict
+                    and pd.notna(incentive_dict[row['importer']])
+                    and row['year'] >= incentive_dict[row['importer']])
+                else 0
+            ), axis=1
+        )
+    else:
+        merged['generosity_imp'] = 0
 
     print(f"Exporter incentive active: {merged['incentive_exporter'].sum()} "
           f"({merged['incentive_exporter'].mean()*100:.1f}%)")
@@ -1224,6 +1327,354 @@ def phase_7_batis_prep():
 
 
 # ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  PHASE 8: PREPARE IMDb GRAVITY ANALYSIS DATASET                        ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+def phase_8_imdb_prep():
+    """
+    Merge IMDb filming location trade flows with CEPII, GDP, EFW, incentives,
+    and remoteness to create analysis-ready datasets.
+    Mirrors Phase 7 (BaTIS prep) structure.
+    """
+
+    print("\n" + "=" * 70)
+    print("PHASE 8: PREPARE IMDb GRAVITY ANALYSIS DATASET")
+    print("=" * 70)
+
+    TRADE_FLOWS_FILE = f'{PROJECT_DIR}\\data\\processed\\imdb\\imdb_filming_trade_flows.csv'
+    CEPII_FILE = f'{PROJECT_DIR}\\data\\processed\\gravity_vars_cepii.csv'
+    GDP_FILE = f'{PROJECT_DIR}\\data\\processed\\gdp_cleaned.csv'
+    EFW_FILE = f'{PROJECT_DIR}\\data\\processed\\efw_cleaned.csv'
+    INCENTIVE_FILE = f'{PROJECT_DIR}\\data\\raw\\base\\film_incentive_intro_dates.csv'
+    ANALYSIS_FILE = f'{PROJECT_DIR}\\data\\processed\\imdb\\imdb_gravity_analysis.csv'
+    MERGED_FILE = f'{PROJECT_DIR}\\data\\processed\\imdb\\imdb_gravity_merged.csv'
+
+    # --- 8a: Load shared data ---
+    print("\n--- 8a: Load shared data ---")
+
+    flows = pd.read_csv(TRADE_FLOWS_FILE)
+    print(f"Trade flows: {len(flows):,} rows, years {flows['year'].min()}-{flows['year'].max()}")
+    print(f"Unique importers: {flows['importer'].nunique()}, exporters: {flows['exporter'].nunique()}")
+
+    cepii = pd.read_csv(CEPII_FILE)
+    print(f"CEPII: {len(cepii):,} rows, years {cepii['year'].min()}-{cepii['year'].max()}")
+    cepii_max = cepii['year'].max()
+    if YEAR_MAX_IMDB > cepii_max:
+        print(f"Forward-filling CEPII from {cepii_max} to {YEAR_MAX_IMDB}...")
+        cepii_latest = cepii[cepii['year'] == cepii_max].copy()
+        new_rows = [cepii_latest.assign(year=y) for y in range(cepii_max + 1, YEAR_MAX_IMDB + 1)]
+        cepii = pd.concat([cepii] + new_rows, ignore_index=True)
+
+    gdp = pd.read_csv(GDP_FILE)
+    print(f"GDP: {len(gdp):,} rows, years {gdp['date'].min()}-{gdp['date'].max()}")
+
+    efw = pd.read_csv(EFW_FILE)
+    print(f"EFW: {len(efw):,} rows, years {efw['year'].min()}-{efw['year'].max()}")
+    efw_max = efw['year'].max()
+    if efw_max < YEAR_MAX_IMDB:
+        print(f"Forward-filling EFW from {efw_max} to {YEAR_MAX_IMDB}...")
+        efw_latest = efw[efw['year'] == efw_max].copy()
+        new_efw = [efw_latest.assign(year=y) for y in range(efw_max + 1, YEAR_MAX_IMDB + 1)]
+        efw = pd.concat([efw] + new_efw, ignore_index=True)
+
+    incentives = pd.read_csv(INCENTIVE_FILE)
+    print(f"Incentives: {len(incentives)} countries")
+
+    incentive_dict = dict(zip(
+        incentives['country_iso2'].astype(str),
+        incentives['incentive_intro_year']
+    ))
+
+    TYPE_DUMMIES = ['is_refundable_credit', 'is_transferable_credit',
+                    'is_standard_credit', 'is_cash_rebate']
+    type_lookups = {}
+    for dtype in TYPE_DUMMIES:
+        if dtype in incentives.columns:
+            type_lookups[dtype] = dict(zip(
+                incentives['country_iso2'].astype(str),
+                incentives[dtype].fillna(0).astype(int)
+            ))
+        else:
+            type_lookups[dtype] = {}
+
+    has_generosity = 'headline_rate_pct' in incentives.columns
+    generosity_dict = {}
+    if has_generosity:
+        generosity_dict = dict(zip(
+            incentives['country_iso2'].astype(str),
+            incentives['headline_rate_pct'].fillna(0) / 100
+        ))
+        print(f"  Loaded headline_rate_pct for generosity analysis")
+
+    # --- 8b: Merge with CEPII ---
+    print("\n--- 8b: Merge with CEPII ---")
+
+    merged = flows.merge(
+        cepii, left_on=['exporter', 'importer', 'year'],
+        right_on=['iso_o', 'iso_d', 'year'], how='left'
+    )
+    merged = merged.drop(columns=['iso_o', 'iso_d'], errors='ignore')
+
+    print(f"After CEPII merge: {len(merged):,} rows")
+    print(f"Missing distance: {merged['log_dist'].isna().sum()} ({merged['log_dist'].isna().mean()*100:.1f}%)")
+
+    unmatched = merged[merged['log_dist'].isna()][['importer', 'exporter']].drop_duplicates()
+    if 0 < len(unmatched) <= 30:
+        print(f"\nUnmatched pairs ({len(unmatched)}):")
+        for _, row in unmatched.iterrows():
+            print(f"  {row['importer']} -> {row['exporter']}")
+
+    # --- 8c: Merge with GDP ---
+    print("\n--- 8c: Merge with GDP ---")
+
+    merged = merged.merge(
+        gdp[['country', 'date', 'log_gdp']].rename(
+            columns={'country': 'importer', 'date': 'year', 'log_gdp': 'log_gdp_importer'}),
+        on=['importer', 'year'], how='left'
+    )
+    merged = merged.merge(
+        gdp[['country', 'date', 'log_gdp']].rename(
+            columns={'country': 'exporter', 'date': 'year', 'log_gdp': 'log_gdp_exporter'}),
+        on=['exporter', 'year'], how='left'
+    )
+
+    print(f"Missing importer GDP: {merged['log_gdp_importer'].isna().sum()} "
+          f"({merged['log_gdp_importer'].isna().mean()*100:.1f}%)")
+    print(f"Missing exporter GDP: {merged['log_gdp_exporter'].isna().sum()} "
+          f"({merged['log_gdp_exporter'].isna().mean()*100:.1f}%)")
+
+    # --- 8d: Merge with EFW ---
+    print("\n--- 8d: Merge with EFW ---")
+
+    merged = merged.merge(
+        efw.rename(columns={'country': 'importer', 'efw': 'efw_importer'}),
+        on=['importer', 'year'], how='left'
+    )
+    merged = merged.merge(
+        efw.rename(columns={'country': 'exporter', 'efw': 'efw_exporter'}),
+        on=['exporter', 'year'], how='left'
+    )
+
+    print(f"Missing importer EFW: {merged['efw_importer'].isna().sum()} "
+          f"({merged['efw_importer'].isna().mean()*100:.1f}%)")
+    print(f"Missing exporter EFW: {merged['efw_exporter'].isna().sum()} "
+          f"({merged['efw_exporter'].isna().mean()*100:.1f}%)")
+
+
+    # --- 8d2: Create income-adjusted EFW (EFWRESID) ---
+    print("\n--- 8d2: Create income-adjusted EFW (EFWRESID, pooled OLS) ---")
+
+    import statsmodels.api as sm_ols
+
+    # Pooled regression: EFW = alpha + beta * ln(GDP) + epsilon
+    # Residual = EFW component orthogonal to income (Kimura & Lee, 2006)
+    # Collapse to unique country-year observations before regression
+    # to avoid weighting countries by their bilateral pair frequency.
+
+    # Exporter side: collapse to unique (exporter, year) observations
+    exp_cy = (merged[['exporter', 'year', 'efw_exporter', 'log_gdp_exporter']]
+              .drop_duplicates(subset=['exporter', 'year'])
+              .dropna(subset=['efw_exporter', 'log_gdp_exporter']))
+    if len(exp_cy) > 50:
+        X_exp = sm_ols.add_constant(exp_cy['log_gdp_exporter'])
+        res_exp = sm_ols.OLS(exp_cy['efw_exporter'].values, X_exp).fit()
+        exp_cy = exp_cy.copy()
+        exp_cy['efwresid_exporter'] = res_exp.resid
+        print(f"  Exporter EFWRESID: N={int(res_exp.nobs)} unique country-years, "
+              f"R2={res_exp.rsquared:.4f}, beta(ln GDP)={res_exp.params.iloc[1]:.4f}")
+        merged = merged.merge(
+            exp_cy[['exporter', 'year', 'efwresid_exporter']],
+            on=['exporter', 'year'], how='left'
+        )
+    else:
+        merged['efwresid_exporter'] = np.nan
+        print("  WARNING: too few obs for exporter EFWRESID regression")
+
+    # Importer side: collapse to unique (importer, year) observations
+    imp_cy = (merged[['importer', 'year', 'efw_importer', 'log_gdp_importer']]
+              .drop_duplicates(subset=['importer', 'year'])
+              .dropna(subset=['efw_importer', 'log_gdp_importer']))
+    if len(imp_cy) > 50:
+        X_imp = sm_ols.add_constant(imp_cy['log_gdp_importer'])
+        res_imp = sm_ols.OLS(imp_cy['efw_importer'].values, X_imp).fit()
+        imp_cy = imp_cy.copy()
+        imp_cy['efwresid_importer'] = res_imp.resid
+        print(f"  Importer EFWRESID: N={int(res_imp.nobs)} unique country-years, "
+              f"R2={res_imp.rsquared:.4f}, beta(ln GDP)={res_imp.params.iloc[1]:.4f}")
+        merged = merged.merge(
+            imp_cy[['importer', 'year', 'efwresid_importer']],
+            on=['importer', 'year'], how='left'
+        )
+    else:
+        merged['efwresid_importer'] = np.nan
+        print("  WARNING: too few obs for importer EFWRESID regression")
+
+    n_resid = merged['efwresid_exporter'].notna().sum()
+    print(f"  EFWRESID coverage: {n_resid:,} / {len(merged):,} "
+          f"({n_resid/len(merged)*100:.1f}%)")
+
+    # --- 8e: Create incentive variables ---
+    print("\n--- 8e: Create incentive variables ---")
+
+    merged['incentive_exporter'] = merged.apply(
+        lambda row: 1 if row['exporter'] in incentive_dict
+                         and pd.notna(incentive_dict[row['exporter']])
+                         and row['year'] >= incentive_dict[row['exporter']] else 0,
+        axis=1
+    )
+    merged['incentive_importer'] = merged.apply(
+        lambda row: 1 if row['importer'] in incentive_dict
+                         and pd.notna(incentive_dict[row['importer']])
+                         and row['year'] >= incentive_dict[row['importer']] else 0,
+        axis=1
+    )
+
+    for dtype in TYPE_DUMMIES:
+        col_exp = f'{dtype}_exp'
+        merged[col_exp] = merged.apply(
+            lambda row, dt=dtype: (
+                1 if (row['exporter'] in incentive_dict
+                      and pd.notna(incentive_dict[row['exporter']])
+                      and row['year'] >= incentive_dict[row['exporter']]
+                      and type_lookups[dt].get(row['exporter'], 0) == 1)
+                else 0
+            ), axis=1
+        )
+
+    if has_generosity:
+        merged['generosity_exp'] = merged.apply(
+            lambda row: (
+                generosity_dict.get(row['exporter'], 0)
+                if (row['exporter'] in incentive_dict
+                    and pd.notna(incentive_dict[row['exporter']])
+                    and row['year'] >= incentive_dict[row['exporter']])
+                else 0
+            ), axis=1
+        )
+    else:
+        merged['generosity_exp'] = 0
+
+    # Generosity (importer)
+    if has_generosity:
+        merged['generosity_imp'] = merged.apply(
+            lambda row: (
+                generosity_dict.get(row['importer'], 0)
+                if (row['importer'] in incentive_dict
+                    and pd.notna(incentive_dict[row['importer']])
+                    and row['year'] >= incentive_dict[row['importer']])
+                else 0
+            ), axis=1
+        )
+    else:
+        merged['generosity_imp'] = 0
+
+    print(f"Exporter incentive active: {merged['incentive_exporter'].sum()} "
+          f"({merged['incentive_exporter'].mean()*100:.1f}%)")
+    print(f"Importer incentive active: {merged['incentive_importer'].sum()} "
+          f"({merged['incentive_importer'].mean()*100:.1f}%)")
+
+    for dtype in TYPE_DUMMIES:
+        col = f'{dtype}_exp'
+        print(f"  {dtype}: {merged[col].sum()} ({merged[col].mean()*100:.1f}%)")
+
+    if has_generosity:
+        active_gen = merged[merged['generosity_exp'] > 0]['generosity_exp']
+        if len(active_gen) > 0:
+            print(f"\nGenerosity (active): mean={active_gen.mean()*100:.1f}%, "
+                  f"min={active_gen.min()*100:.1f}%, max={active_gen.max()*100:.1f}%")
+
+    # --- 8f: Calculate remoteness ---
+    print("\n--- 8f: Calculate remoteness ---")
+
+    gdp_levels = gdp[['country', 'date', 'gdp']].rename(columns={'date': 'year'}).copy()
+    gdp_levels = gdp_levels.dropna(subset=['gdp'])
+    world_gdp = gdp_levels.groupby('year')['gdp'].sum().reset_index()
+    world_gdp.columns = ['year', 'gdp_world']
+
+    dist_year = cepii[cepii['year'] <= 2020]['year'].max()
+    dist_data = cepii[cepii['year'] == dist_year][['iso_o', 'iso_d', 'dist']].copy()
+    dist_data = dist_data.dropna(subset=['dist'])
+    dist_data = dist_data[(dist_data['dist'] > 0) & (dist_data['iso_o'] != dist_data['iso_d'])]
+
+    all_countries = sorted(set(merged['exporter'].unique()) | set(merged['importer'].unique()))
+    all_years_list = sorted(merged['year'].unique())
+
+    remoteness_records = []
+    for yr in all_years_list:
+        gdp_yr = gdp_levels[gdp_levels['year'] == yr].set_index('country')['gdp'].to_dict()
+        gdp_world_yr = world_gdp[world_gdp['year'] == yr]['gdp_world'].values
+        if len(gdp_world_yr) == 0:
+            continue
+        gdp_world_yr = gdp_world_yr[0]
+
+        for country in all_countries:
+            dists = dist_data[dist_data['iso_o'] == country][['iso_d', 'dist']]
+            if len(dists) == 0:
+                continue
+            weighted_sum = 0
+            for _, row in dists.iterrows():
+                partner = row['iso_d']
+                if partner == country:
+                    continue
+                partner_gdp = gdp_yr.get(partner, None)
+                if partner_gdp and partner_gdp > 0:
+                    weighted_sum += (partner_gdp / gdp_world_yr) / row['dist']
+            if weighted_sum > 0:
+                remoteness_records.append({
+                    'country': country, 'year': yr,
+                    'remoteness': np.log(1 / weighted_sum)
+                })
+
+        if yr % 5 == 0:
+            print(f"  Processed remoteness for {yr}")
+
+    remoteness_df = pd.DataFrame(remoteness_records)
+    print(f"Remoteness calculated: {len(remoteness_df):,} country-year observations")
+
+    merged = merged.merge(
+        remoteness_df.rename(columns={'country': 'importer', 'remoteness': 'remoteness_importer'}),
+        on=['importer', 'year'], how='left'
+    )
+    merged = merged.merge(
+        remoteness_df.rename(columns={'country': 'exporter', 'remoteness': 'remoteness_exporter'}),
+        on=['exporter', 'year'], how='left'
+    )
+
+    print(f"Missing importer remoteness: {merged['remoteness_importer'].isna().sum()}")
+    print(f"Missing exporter remoteness: {merged['remoteness_exporter'].isna().sum()}")
+
+    # --- 8g: Prepare and save analysis datasets ---
+    print("\n--- 8g: Prepare and save analysis datasets ---")
+
+    est_vars = [
+        'num_films', 'log_gdp_importer', 'log_gdp_exporter',
+        'log_dist', 'contig', 'comlang_off', 'col45',
+        'rta', 'remoteness_importer', 'remoteness_exporter',
+        'efw_importer', 'efw_exporter',
+        'incentive_exporter', 'incentive_importer'
+    ]
+
+    print(f"Total observations: {len(merged):,}")
+    print(f"\nMissing values:")
+    for var in est_vars:
+        n_miss = merged[var].isna().sum()
+        if n_miss > 0:
+            print(f"  {var}: {n_miss} ({n_miss/len(merged)*100:.1f}%)")
+
+    df = merged.dropna(subset=est_vars).copy()
+    print(f"\nComplete cases (with EFW): {len(df):,}")
+    print(f"Exporters: {df['exporter'].nunique()}, Importers: {df['importer'].nunique()}")
+    print(f"Years: {df['year'].min()}-{df['year'].max()}")
+
+    merged.to_csv(MERGED_FILE, index=False)
+    df.to_csv(ANALYSIS_FILE, index=False)
+
+    print(f"\nSaved:")
+    print(f"  Merged (all obs):    {MERGED_FILE} ({len(merged):,} rows)")
+    print(f"  Analysis (complete): {ANALYSIS_FILE} ({len(df):,} rows)")
+
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
 # ║  MAIN EXECUTION                                                         ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 
@@ -1252,6 +1703,9 @@ if __name__ == '__main__':
 
     if RUN_PHASE_7_BATIS_PREP:
         phase_7_batis_prep()
+
+    if RUN_PHASE_8_IMDB_PREP:
+        phase_8_imdb_prep()
 
     print("\n" + "=" * 70)
     print("ALL PHASES COMPLETE")
