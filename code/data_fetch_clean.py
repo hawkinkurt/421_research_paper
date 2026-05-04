@@ -30,6 +30,12 @@ Outputs:
            data/processed/batis_sk1_gravity_merged.csv
   Phase 8: data/processed/imdb/imdb_gravity_analysis.csv,
            data/processed/imdb/imdb_gravity_merged.csv
+
+NOTE: Incentive type typology follows the Olsberg SPI Global Incentives
+Index 2025 three-category classification: rebate, tax_credit, tax_shelter.
+The input file film_incentive_intro_dates.csv must contain the binary
+columns is_rebate, is_tax_credit, and is_tax_shelter (exactly one of
+which should equal 1 for countries with an active scheme).
 """
 
 import os
@@ -62,6 +68,10 @@ YEAR_MAX_IMDB = 2023
 YEAR_MAX_BATIS = 2023
 CPI_BASE_YEAR_IMDB = 2010
 CPI_BASE_YEAR_BATIS = 2010
+
+# Incentive type columns in film_incentive_intro_dates.csv
+# Follows Olsberg SPI 2025 three-category typology.
+TYPE_DUMMIES = ['is_rebate', 'is_tax_credit', 'is_tax_shelter']
 
 
 # =============================================================================
@@ -981,7 +991,7 @@ def phase_7_batis_prep():
         new_efw = [efw_latest.assign(year=y) for y in range(efw_max + 1, YEAR_MAX_BATIS + 1)]
         efw = pd.concat([efw] + new_efw, ignore_index=True)
 
-    # Incentives
+    # Incentives (Olsberg three-category typology: rebate, tax_credit, tax_shelter)
     incentives = pd.read_csv(INCENTIVE_FILE)
     print(f"Incentives: {len(incentives)} countries")
 
@@ -990,8 +1000,7 @@ def phase_7_batis_prep():
         incentives['incentive_intro_year']
     ))
 
-    TYPE_DUMMIES = ['is_refundable_credit', 'is_transferable_credit',
-                    'is_standard_credit', 'is_cash_rebate']
+    # Build type lookups for the three Olsberg categories
     type_lookups = {}
     for dtype in TYPE_DUMMIES:
         if dtype in incentives.columns:
@@ -1000,7 +1009,14 @@ def phase_7_batis_prep():
                 incentives[dtype].fillna(0).astype(int)
             ))
         else:
+            print(f"  WARNING: column '{dtype}' not found in {INCENTIVE_FILE}")
             type_lookups[dtype] = {}
+
+    # Report type distribution
+    print(f"  Type distribution (active schemes):")
+    for dtype in TYPE_DUMMIES:
+        n = sum(1 for v in type_lookups[dtype].values() if v == 1)
+        print(f"    {dtype}: {n}")
 
     has_generosity = 'headline_rate_pct' in incentives.columns
     generosity_dict = {}
@@ -1175,7 +1191,8 @@ def phase_7_batis_prep():
         axis=1
     )
 
-    # Incentive type dummies
+    # Incentive type dummies — one per Olsberg category (is_rebate, is_tax_credit, is_tax_shelter)
+    # Each dummy = 1 iff exporter has active incentive AND belongs to that type.
     for dtype in TYPE_DUMMIES:
         col_exp = f'{dtype}_exp'
         merged[col_exp] = merged.apply(
@@ -1224,6 +1241,13 @@ def phase_7_batis_prep():
     for dtype in TYPE_DUMMIES:
         col = f'{dtype}_exp'
         print(f"  {dtype}: {merged[col].sum()} ({merged[col].mean()*100:.1f}%)")
+
+    # Sanity check: sum of type dummies should equal incentive_exporter for each row
+    type_sum = sum(merged[f'{dt}_exp'] for dt in TYPE_DUMMIES)
+    mismatches = (type_sum != merged['incentive_exporter']).sum()
+    if mismatches > 0:
+        print(f"  WARNING: {mismatches} rows where sum of type dummies != incentive_exporter")
+        print(f"           (indicates countries assigned to multiple types or no type)")
 
     if has_generosity:
         active_gen = merged[merged['generosity_exp'] > 0]['generosity_exp']
@@ -1377,6 +1401,7 @@ def phase_8_imdb_prep():
         new_efw = [efw_latest.assign(year=y) for y in range(efw_max + 1, YEAR_MAX_IMDB + 1)]
         efw = pd.concat([efw] + new_efw, ignore_index=True)
 
+    # Incentives (Olsberg three-category typology: rebate, tax_credit, tax_shelter)
     incentives = pd.read_csv(INCENTIVE_FILE)
     print(f"Incentives: {len(incentives)} countries")
 
@@ -1385,8 +1410,7 @@ def phase_8_imdb_prep():
         incentives['incentive_intro_year']
     ))
 
-    TYPE_DUMMIES = ['is_refundable_credit', 'is_transferable_credit',
-                    'is_standard_credit', 'is_cash_rebate']
+    # Build type lookups for the three Olsberg categories
     type_lookups = {}
     for dtype in TYPE_DUMMIES:
         if dtype in incentives.columns:
@@ -1395,7 +1419,14 @@ def phase_8_imdb_prep():
                 incentives[dtype].fillna(0).astype(int)
             ))
         else:
+            print(f"  WARNING: column '{dtype}' not found in {INCENTIVE_FILE}")
             type_lookups[dtype] = {}
+
+    # Report type distribution
+    print(f"  Type distribution (active schemes):")
+    for dtype in TYPE_DUMMIES:
+        n = sum(1 for v in type_lookups[dtype].values() if v == 1)
+        print(f"    {dtype}: {n}")
 
     has_generosity = 'headline_rate_pct' in incentives.columns
     generosity_dict = {}
@@ -1529,6 +1560,7 @@ def phase_8_imdb_prep():
         axis=1
     )
 
+    # Incentive type dummies — one per Olsberg category (is_rebate, is_tax_credit, is_tax_shelter)
     for dtype in TYPE_DUMMIES:
         col_exp = f'{dtype}_exp'
         merged[col_exp] = merged.apply(
@@ -1576,6 +1608,13 @@ def phase_8_imdb_prep():
     for dtype in TYPE_DUMMIES:
         col = f'{dtype}_exp'
         print(f"  {dtype}: {merged[col].sum()} ({merged[col].mean()*100:.1f}%)")
+
+    # Sanity check: sum of type dummies should equal incentive_exporter for each row
+    type_sum = sum(merged[f'{dt}_exp'] for dt in TYPE_DUMMIES)
+    mismatches = (type_sum != merged['incentive_exporter']).sum()
+    if mismatches > 0:
+        print(f"  WARNING: {mismatches} rows where sum of type dummies != incentive_exporter")
+        print(f"           (indicates countries assigned to multiple types or no type)")
 
     if has_generosity:
         active_gen = merged[merged['generosity_exp'] > 0]['generosity_exp']

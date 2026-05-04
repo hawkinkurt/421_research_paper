@@ -20,12 +20,23 @@ Models (all run for both film count and budget dep vars,
   M8:  Incentive dummies (mirrors M3)
   M9:  Event study (relative-time dummies replacing exporter incentive)
   M10: Cluster: M8 + years_active
+  M11: Incentive type dummies (mirrors M4, pair FE)
 
-  Pair FE models (M8, M9, M10) each run on:
+  Pair FE models (M8, M9, M10, M11) each run on:
     (a) Full sample
     (b) Excluding Anglo-to-Anglo pairs
     (c) Excluding all Anglo pairs
     (d) Without EFW controls
+
+NOTE: Incentive type typology follows the Olsberg SPI Global Incentives
+Index 2025, which classifies schemes into three categories: rebate,
+tax_credit, and tax_shelter. The is_tax_credit category encompasses what
+were previously separately coded as refundable, transferable, and
+non-refundable (standard) credits. Since there is substantial collinearity
+between the three-way split with only ~6 tax credit observations and
+minimal within-sample variation across subtypes, the unified tax_credit
+category is used for estimation. A tax_credit_subtype column in the
+incentive dataset preserves the finer distinction for descriptive use.
 """
 
 import pandas as pd
@@ -96,10 +107,9 @@ if has_efwresid:
     print(f"  efwresid_exporter coverage: {df['efwresid_exporter'].notna().sum():,}")
     print(f"  efwresid_importer coverage: {df['efwresid_importer'].notna().sum():,}")
 
-# Type dummy variables
+# Type dummy variables — Olsberg three-category typology (rebate, tax_credit, tax_shelter)
 type_dummy_vars = [f'{d}_exp' for d in
-                   ['is_refundable_credit', 'is_transferable_credit',
-                    'is_standard_credit', 'is_cash_rebate']]
+                   ['is_rebate', 'is_tax_credit', 'is_tax_shelter']]
 type_vars_available = [v for v in type_dummy_vars
                        if v in df.columns and df[v].nunique() > 1]
 print(f"Incentive type dummies available: {type_vars_available}")
@@ -511,6 +521,12 @@ for efw_key, efw_cfg in EFW_VARIANTS.items():
 
         # ─────────────────────────────────────────────────────────────
         # MODEL 4: Incentive type dummies (PPML)
+        # Olsberg typology: rebate, tax_credit, tax_shelter
+        # Note: to avoid the dummy variable trap, one category must be
+        # omitted as the reference. We omit is_rebate_exp since rebates
+        # are the modal category (~48 of 57 active-incentive countries).
+        # The tax_credit and tax_shelter coefficients therefore represent
+        # the effect relative to the rebate baseline.
         # ─────────────────────────────────────────────────────────────
 
         print(f"\n{'='*70}")
@@ -519,15 +535,24 @@ for efw_key, efw_cfg in EFW_VARIANTS.items():
 
         m4 = None
         if type_vars_available:
-            type_str = ' + '.join(type_vars_available)
-            f4 = (f'{ppml_dep} ~ {FULL_GRAVITY} + '
-                  f'{type_str} + incentive_importer + {FE_TERMS}')
-            m4 = fit_ppml(f4, df, "M4")
-            if m4:
-                print(f"Pseudo-R²: {pseudo_r2(m4):.4f}, N: {int(m4.nobs)}")
-                print_model_results(m4, [
-                    'log_dist', 'comlang_off', 'incentive_importer'
-                ] + type_vars_available, "M4")
+            # Omit is_rebate_exp as reference category
+            type_vars_m4 = [v for v in type_vars_available
+                            if v != 'is_rebate_exp']
+            if type_vars_m4:
+                type_str = ' + '.join(type_vars_m4)
+                f4 = (f'{ppml_dep} ~ {FULL_GRAVITY} + '
+                      f'incentive_exporter + {type_str} + incentive_importer + '
+                      f'{FE_TERMS}')
+                m4 = fit_ppml(f4, df, "M4")
+                if m4:
+                    print(f"Pseudo-R²: {pseudo_r2(m4):.4f}, N: {int(m4.nobs)}")
+                    print(f"Reference category: rebate (is_rebate_exp omitted)")
+                    print_model_results(m4, [
+                        'log_dist', 'comlang_off',
+                        'incentive_exporter', 'incentive_importer'
+                    ] + type_vars_m4, "M4")
+            else:
+                print("  SKIPPED - no non-reference type variables with variation")
         else:
             print("  SKIPPED - no incentive type variables with variation")
         spec_results['M4'] = m4
@@ -611,7 +636,7 @@ for efw_key, efw_cfg in EFW_VARIANTS.items():
         spec_results['M7'] = m7
 
         # ─────────────────────────────────────────────────────────────
-        # PREPARE SUBSAMPLES FOR PAIR FE MODELS (M8, M9, M10)
+        # PREPARE SUBSAMPLES FOR PAIR FE MODELS (M8, M9, M10, M11)
         # ─────────────────────────────────────────────────────────────
 
         print(f"\n--- Preparing subsamples for pair FE models ---")
@@ -698,6 +723,45 @@ for efw_key, efw_cfg in EFW_VARIANTS.items():
         spec_results['M10'] = m10_results
 
         # ─────────────────────────────────────────────────────────────
+        # MODEL 11: Incentive Types, pair FE (OLS) — all subsamples
+        # Rebate is the omitted reference category (see M4 note).
+        # ─────────────────────────────────────────────────────────────
+
+        print(f"\n\n{'#'*70}")
+        print(f"# MODEL 11: Incentive Types - Pair FE (OLS) - {tag}")
+        print(f"{'#'*70}")
+
+        m11_results = {}
+        if type_vars_available:
+            # Omit is_rebate_exp as reference (same as M4)
+            type_vars_m11 = [v for v in type_vars_available
+                             if v != 'is_rebate_exp']
+
+            if type_vars_m11:
+                # Keep incentive_exporter + tax_credit + tax_shelter type dummies
+                # (rebate is the reference when incentive_exporter=1 and both
+                # non-rebate type dummies = 0)
+                TV_FULL_TYPES = TV_FULL + type_vars_m11
+                TV_NO_EFW_TYPES = TV_NO_EFW + type_vars_m11
+
+                subsamples_m11 = [
+                    ('Full sample', df, TV_FULL_TYPES),
+                    ('Excl Anglo-to-Anglo', df_excl_aa, TV_FULL_TYPES),
+                    ('Excl all Anglo', df_excl_anglo, TV_FULL_TYPES),
+                    ('No EFW', df_no_efw, TV_NO_EFW_TYPES),
+                ]
+
+                for ss_name, ss_df, ss_tv in subsamples_m11:
+                    m11_results[ss_name] = run_pair_fe(
+                        ss_df, ols_dep, ss_tv,
+                        f'M11 {tag} - {ss_name}')
+            else:
+                print("  SKIPPED - no non-reference type variables with variation")
+        else:
+            print("  SKIPPED - no incentive type variables with variation")
+        spec_results['M11'] = m11_results
+
+        # ─────────────────────────────────────────────────────────────
         # SUMMARY TABLE FOR THIS SPEC+EFW COMBINATION
         # ─────────────────────────────────────────────────────────────
 
@@ -727,25 +791,34 @@ for efw_key, efw_cfg in EFW_VARIANTS.items():
                       f"{fmt_coef(model, 'incentive_exporter'):>15}"
                       f"{fmt_coef(model, 'incentive_importer'):>15}")
 
-        # --- Incentive types ---
-        print(f"\n--- INCENTIVE TYPES ---")
-        type_display = ['is_refundable_credit_exp',
-                        'is_transferable_credit_exp',
-                        'is_standard_credit_exp',
-                        'is_cash_rebate_exp']
+        # --- Incentive types (Olsberg three-category typology) ---
+        print(f"\n--- INCENTIVE TYPES (reference: rebate) ---")
+        type_display = ['incentive_exporter',
+                        'is_tax_credit_exp',
+                        'is_tax_shelter_exp']
         print(f"\n{'Specification':<25}", end="")
         for tv in type_display:
-            short = (tv.replace('is_', '').replace('_exp', '')
-                     .replace('_credit', '').replace('_', ' '))
-            print(f"{short:>18}", end="")
+            short = tv.replace('_exp', '').replace('is_', '').replace('_', ' ')
+            print(f"{short:>20}", end="")
         print()
-        print("-" * (25 + 18 * len(type_display)))
+        print("-" * (25 + 20 * len(type_display)))
 
         m4_model = spec_results.get('M4')
         if m4_model:
             row = f"{'M4 (PPML)':<25}"
             for tv in type_display:
-                row += fmt_coef(m4_model, tv).rjust(18)
+                row += fmt_coef(m4_model, tv).rjust(20)
+            print(row)
+
+        # M11 Pair FE type results
+        m11_mr = spec_results.get('M11', {})
+        for ss_name, model in m11_mr.items():
+            if model is None:
+                continue
+            lab = f"M11 PFE ({ss_name})"[:25]
+            row = f"{lab:<25}"
+            for tv in type_display:
+                row += fmt_coef(model, tv).rjust(20)
             print(row)
 
         # --- Early vs late ---
