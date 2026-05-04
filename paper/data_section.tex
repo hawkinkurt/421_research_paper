@@ -1,0 +1,44 @@
+% =============================================================================
+% Data Section --- Film Production Incentives Gravity Model
+%
+% Slots into main document under a \section{Data} header (or similar).
+% This file begins at \subsection{} level.
+%
+% Required packages: none beyond standard LaTeX (no math environments or floats)
+%
+% Bibliography keys referenced:
+%   olsberg2025
+% =============================================================================
+
+% ----------------------------------------------------------------
+\subsection{Bilateral Trade Flow Construction}
+\label{sec:data_flows}
+% ----------------------------------------------------------------
+
+The primary dataset used for this analysis is sourced from the Internet Movie Database (IMDb) and contains the 600 top-grossing films per year from 1990--2023, yielding approximately 20,400 films. Each film contains metadata such as countries of origin, primary filming location, production companies, budget, and release year. Filming locations are extracted by parsing IMDb address strings, taking the final comma-separated element as the country name (e.g., ``671 Lincoln Avenue, Winnetka, Illinois, USA'' yields ``United States''). A comprehensive mapping file harmonises over 160 variant country names and sub-national entities to standardized ISO~3166 country codes. Only films containing valid countries of origin and a filming location which are both different are retained, thereby excluding purely domestic productions. This leaves approximately 7,579 films.
+
+For each film with a valid filming country and at least one identified country of origin, I construct bilateral flows from each origin country to the filming country, excluding domestic pairs where the origin and filming country are identical. Two dependent variables are constructed at the country-pair-year level. The primary dependent variable is the number of films produced per year, while the secondary dependent variable is the total production budgets in constant 2010 USD, which is available for approximately 47\% of films. For films with multiple countries of origin, each origin is paired with this single filming country to generate a separate bilateral flow. When a film has multiple countries of origin, the full budget is divided equally across origin countries.
+
+Coverage of key variables varies across the panel. While countries of origin are available for the vast majority of films, filming location data is available for approximately 70\% of films. Furthermore, a lower proportion of non-English-language productions have budgets in USD, so the budget data underrepresents non-English-language productions, and the sample is biased toward theatrically released, big-budget productions which tend to involve the Anglophone countries (United States, Canada, United Kingdom, Australia, and New Zealand). This limitation is addressed through robustness checks that exclude the Anglophone countries. To account for these factors, I run sub-samples for the Fixed Effects specifications excluding Anglo-to-Anglo country pairs and excluding Anglophone countries altogether.
+
+As a robustness check, I also estimate the model using OECD--WTO Balanced Trade in Services (BaTIS) data from 2005--2023 for ``Audiovisual and related services'' which captures bilateral exports of film, television, radio, and related production services. The BaTIS data aggregate across the full audiovisual services category and while it cannot isolate film production, if it overlaps significantly with the IMDb data results regarding incentive effectiveness it will strengthen my findings. This dataset is produced jointly by the OECD and WTO and while limited in the number of observations, provides a consistent and balanced matrix of bilateral trade in services flows. As with the film budgets, these values are deflated to constant 2010 USD.
+
+% ----------------------------------------------------------------
+\subsection{Gravity Variables}
+\label{sec:data_gravity}
+% ----------------------------------------------------------------
+
+Standard bilateral gravity variables are sourced from the CEPII GeoDist database and include bilateral distance (population-weighted, in logs), contiguity, common official language, colonial relationship post-1945, and regional trade agreements. Where the CEPII data coverage ends at 2020, the most recent available year is forward-filled to 2023 under the assumption that these predominantly time-invariant or slow-moving variables change minimally over this extension period.
+
+The Economic Freedom of the World (EFW) index data is sourced from the Fraser Institute, both measured for importer and exporter. The EFW index is published annually only from 2000 onward; prior to 2000, it is published at five-year intervals. To obtain a complete annual panel for the 1990--2018 period, linear interpolation is applied within each country's time series for the missing years between 1990 and 2000, as is standard in the literature using EFW data.
+
+Annual GDP data is sourced from the World Bank and is deflated to constant 2015 US dollars, with the natural logarithm of GDP being used in the gravity specification. Inflation data for the purposes of deflating film budgets is sourced from the World Bank.
+
+% ----------------------------------------------------------------
+\subsection{Film Incentive Data}
+\label{sec:data_incentives}
+% ----------------------------------------------------------------
+
+Data on national film production incentive schemes for 63 countries is sourced from the Olsberg SPI Global Incentives Index 2025 \citep{olsberg2025}. For each country, the dataset records the year of incentive introduction, the headline rebate or credit rate (as a percentage of qualifying production expenditure), and the incentive type. Incentive types follow the three-category classification used by Olsberg SPI, which distinguishes schemes according to the mechanism through which benefits are delivered: \textbf{rebates}, which return a percentage of qualifying production expenditure as cash grants to producers; \textbf{tax credits}, which offer a reduction against corporate tax owed and which, in many jurisdictions, are either refundable (paid out in cash where tax owed is less than the credit amount) or transferable (saleable to third parties); and \textbf{tax shelters}, which are funded by individual or corporate investors seeking tax relief in exchange for financing production.
+
+The three categories are mutually exclusive and each country is assigned a single category corresponding to its primary national scheme and a headline rate as a \% of production costs. Of the 57 countries with an active national incentive scheme in the dataset, 48 operate a rebate, 6 operate a tax credit, and 3 operate a tax shelter. Where Olsberg reports tiered or variable headline rates (e.g., rates that vary by expenditure band or include uplifts for local hiring), the midpoint across tiers is used.

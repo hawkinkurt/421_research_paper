@@ -1,0 +1,95 @@
+% ================================================================
+% RESULTS SECTION
+% ================================================================
+
+This section presents the estimation results in four stages. Section~\ref{sec:gravity_results} establishes that the gravity framework fits bilateral film production flows. Section~\ref{sec:ppml_incentives} reports the PPML incentive estimates (Models~3--7). Section~\ref{sec:pair_fe_results} subjects these findings to stricter identification via country-pair fixed effects (Models~8--10). Section~\ref{sec:batis_results} compares these findings to the BaTIS robustness test results.
+
+% ----------------------------------------------------------------
+\subsection{The Gravity Framework for Film Production}
+\label{sec:gravity_results}
+% ----------------------------------------------------------------
+
+Tables~\ref{tab:model1} and~\ref{tab:model2} report the baseline and full gravity specifications for both dependent variables. The gravity model fits bilateral film flows well, with pseudo-$R^2$ values of 0.62--0.66, though the determinants differ from goods trade in several notable respects.
+
+Origin GDP is consistently positive and significant, though modest for film counts (elasticity $\approx 0.05$) and much larger for budgets ($\approx 0.6$), reflecting that wealthier origin countries fund more and higher-value overseas productions. Destination GDP is insignificant for film counts and significantly negative for budgets, inverting the standard gravity prediction. This suggests that larger economies tend to be origins rather than destinations of production capital, likely because wealthier economies are likely to have higher production costs which international productions are highly sensitive to.
+
+Distance is negative and highly significant across all specifications, but the elasticity ($-0.24$ to $-0.28$ for film counts; $-0.18$ for budgets) is substantially smaller than the $-0.7$ to $-1.5$ range typically found in goods trade \citep{head2014}. This is consistent with the services trade literature, which finds that non-physical trade is less distance-sensitive \citep{walsh2006, kimura2006}. The smaller distance elasticity for budgets relative to film counts suggests that when distant productions do occur, they tend to be higher budget.
+
+Common language is the single most important predictor of bilateral film flows, increasing production by approximately 69\% for film counts and 47\% for budgets (Model~2). This is larger than the average language effect typically found in goods trade \citep{egger2012}, which makes sense given how language-intensive films are as a product. Contiguity increases film flows by 27\% for counts and 32\% for budgets, less than average good trade estimates.
+
+Colonial relationships are associated with approximately 26\% \textit{less} bilateral film production, contrary to the large positive colonial-tie effects found in goods trade. This is surprising but may reflect that post-colonial cultural production in many ex-colonies has intentionally diverged from the metropole's film tradition (examples include Indian cinema, Latin American cinema, and the Nigerian film industry). It may also reflect that film making is an industry which was relatively small in colonial times and has expanded significantly in recent decades, meaning it is less dependent on historical production networks. Regional trade agreements (RTA) are associated with 17--21\% less production. A potential explanation for this is that RTA partners tend to have similar economic characteristics, so co-productions are unable to take advantage of different economic conditions such as lower wages or a different regulatory environment. This is supported by the lower contiguity estimates compared to goods trade. Finally, economic freedom is insignificant on both sides across all specifications, which contrasts with \citet{kimura2006} where economic freedom variables were found to be an incredibly strong predictor of services trade.
+
+% ----------------------------------------------------------------
+\subsection{Incentive Effects: PPML Estimates}
+\label{sec:ppml_incentives}
+% ----------------------------------------------------------------
+
+Tables~\ref{tab:model3}--\ref{tab:model7} report the PPML incentive estimates. Adding incentive variables does not destabilise the gravity controls, which remain essentially unchanged from Model~2.
+
+\subsubsection{Aggregate Incentive Effects}
+
+Model~3 (Table~\ref{tab:model3}) introduces the primary variables of interest. For film counts, the destination incentive coefficient implies that countries with active incentive schemes receive approximately 18\% more international productions, while the origin coefficient implies that studios reduce overseas filming by about 12\% when their home country introduces incentives.
+
+For budgets, an asymmetry emerges. The destination attraction effect is similar in magnitude ($+20\%$) but statistically insignificant, while the origin pull-back effect is much larger ($-38\%$) and statistically significant. Home-country incentives appear to most effectively retain high-budget productions, which have the most to gain in absolute terms from a domestic rebate on a large qualifying spend. This pattern of a strong destination effect for film counts but not budgets and a strong origin effect for budgets but not counts persists across Models~4--7.
+
+\subsubsection{Incentive Design}
+
+Model~4 (Table~\ref{tab:model4}) disaggregates destination incentives into three instrument types: cash rebates, tax credits, and tax shelters. The specification retains the aggregate destination incentive dummy, with cash rebates as the omitted reference category; the tax credit and tax shelter coefficients therefore capture the differential effect of those instruments relative to a rebate scheme.
+
+For film counts, cash rebates are the most robustly effective instrument, and the estimate is similar to the Model~3 destination coefficient. Tax credits add an insignificant $+8.1\%$ differential and tax shelters show a negative differential of $-9.3\%$, but these are both statistically insignificant.
+
+For budgets, cash rebates show a large positive coefficient ($+30\%$) but it is not statistically significant. Tax credits add a small negative differential ($-8\%$) but this is insignificant. Tax shelters are associated with a large negative differential ($-67\%$ relative to a cash rebate scheme); combined with the positive baseline rebate coefficient, this implies that destinations offering only tax shelter regimes attract roughly $56\%$ less inward production spending than destinations with no scheme at all. This pattern is consistent with tax shelter regimes being structured around investor tax optimisation rather than genuine production attraction. However, given the small sample size (only 3 countries operate tax shelters regimes) as well as potential selection effects, we cannot draw strong conclusions from this result.
+
+\subsubsection{Generosity}
+
+Model~5 (Table~\ref{tab:model5}) replaces dummies with continuous generosity rates. At the mean active generosity of 27.6\%, the implied effects are $+17\%$ for destination film counts and $-13\%$ for origin film counts, aligning closely with the binary estimates from Model~3 ($+18\%$ and $-12\%$ respectively). The consistency across functional forms strengthens confidence in the core estimates and confirms that the incentive rate matters proportionally: a 30\% credit attracts more production than a 20\% credit.
+
+\subsubsection{Duration and Timing}
+
+Models~6 and~7 (Tables~\ref{tab:model6} and~\ref{tab:model7}) test whether incentive effects accumulate over time. Model~6 finds no evidence of duration effects: each additional year of incentive operation adds approximately 0.6\% to inward film production, but this is statistically insignificant. The benefit of having incentives appears to be a one-time level shift rather than a compounding advantage, providing no support for the ``cluster-building'' narrative.
+
+Model~7, however, reveals that \textit{when} a country adopted incentives matters. Early adopters (pre-2005) attract 26\% more films and 45\% more production spending, both highly significant. Late adopters attract only 15\% more films and show no statistically significant budget effect. This decomposition resolves an apparent puzzle from Model~3: the insignificant aggregate budget destination effect was masking two very different effects that averaged out. Early adopters attracted both more films and substantially more spending; late adopters diluted the pooled estimate.
+
+The distinction between Models~6 and~7 is important. The absence of duration effects means incentive programmes do not become more effective the longer they operate. Early adopters did better because they entered a less competitive landscape, but as more countries introduced schemes, the marginal attraction of any single destination's incentive was diluted.
+
+% ----------------------------------------------------------------
+\subsection{Identification: Country-Pair Fixed Effects}
+\label{sec:pair_fe_results}
+% ----------------------------------------------------------------
+
+Tables~\ref{tab:model8}--\ref{tab:model10} report pair fixed effects estimates, which absorb all time-invariant bilateral heterogeneity and identify incentive effects exclusively from within-pair temporal variation.
+
+\subsubsection{Pair FE Incentive Effects}
+
+Model~8 (Table~\ref{tab:model8}) provides the most demanding test. For film counts, the destination incentive effect survives at approximately $+9\%$, attenuated from the PPML estimate of $+18\%$. The attenuation is expected: pair FE strip out the cross-sectional correlation between incentive adoption and pre-existing production relationships. The roughly 50\% reduction from PPML to pair FE quantifies the selection component, whereby countries with established film industries were more likely to adopt incentives, inflating the cross-sectional estimate. The portion that survives ($+9\%$) represents the genuine within-pair effect. This result is robust across subsamples. Excluding Anglo-to-Anglo pairs yields $+9.4\%$; excluding all Anglo countries yields $+7.2\%$; dropping EFW controls yields $+9.4\%$.
+
+For budgets, the pair FE destination effect is larger and significant in both the full sample and excluding Anglo-to-Anglo pairs. However, it collapses entirely when all Anglo countries are excluded, suggesting that the budget-weighted destination effect is driven by production spending from Anglo countries such as the US.
+
+The origin pull-back for film counts is $-8.8\%$ and significant in the full sample. The effect vanishes in the excluding-all-Anglo subsample, but the result is insignificant. For budgets, the origin effect is insignificant across all pair FE subsamples, indicating that the large PPML estimate ($-38\%$) reflected between-pair rather than within-pair variation.
+
+\subsubsection{Event Study}
+
+Model~9 (Table~\ref{tab:model9}) replaces the destination incentive dummy with relative-time dummies to examine dynamic effects and test parallel trends.
+
+For film counts, the full-sample pre-treatment coefficients are not perfectly flat (average 0.075, with $\tau_{-5}$ marginally significant), but the pattern is erratic rather than monotonically trending. Post-treatment coefficients show a clear jump at $\tau_{+1}$ and $\tau_{+2}$, consistent with a one-to-two year lag between incentive introduction and production decisions responding. The incremental effect (post-treatment average minus the pre-treatment average) is approximately 0.08, aligning with the Model~8 pair FE estimate (0.091). However, when all Anglo countries are excluded, the pre-treatment coefficients are larger and individually significant, with the post-treatment average (0.112) falling \textit{below} the pre-treatment average (0.145). This undermines causal claims for the non-Anglo film count subsample.
+
+The budget event study provides the cleanest causal evidence in this paper. The full-sample pre-treatment average is essentially zero (0.007), with no individually significant coefficients. Post-treatment effects are small initially but grow substantially from $\tau_{+5}$ onward, consistent with high-budget productions' longer planning horizons. The excluding-Anglo-to-Anglo subsample is the strongest specification: a slightly negative pre-treatment average ($-0.069$), followed by large and increasingly significant post-treatment effects. The growing trajectory suggests incentives first attract smaller, more mobile productions that appear quickly in film counts, while larger-budget activity follows with a multi-year lag.
+
+\subsubsection{Duration Under Pair FE}
+
+Model~10 (Table~\ref{tab:model10}) confirms the null duration result from Model~6 under pair FE identification. The years-active coefficient is insignificant for film counts across all subsamples (0.1--0.4\% per year) and for budgets in three of four subsamples. The one exception is the excluding-all-Anglo budget subsample, where years active is significantly \textit{negative} ($-6.9\%$ per year). This suggests that non-Anglo destinations may see incentive effectiveness decay as competitive entry erodes their initial advantage, but the small sample size (835 observations, 72 pairs) limits this result.
+
+% ----------------------------------------------------------------
+\subsection{Cross-Dataset Validation: BaTIS Audiovisual Services}
+\label{sec:batis_results}
+% ----------------------------------------------------------------
+
+The parallel estimation on related audiovisual services data provides independent validation. The BaTIS results are reported in full in the appendix tables.
+
+The gravity framework fits BaTIS more closely than IMDb in several respects. Both origin and destination GDP are large and highly significant, consistent with standard gravity predictions for services trade. Distance is larger and closer to goods trade estimates than the IMDb elasticities. Common language doubles audiovisual services flows ($+102\%$), exceeding even the largest IMDb effect ($+69\%$). Colonial ties and RTAs are both positive and significant in BaTIS, reversing the negative IMDb findings. This divergence likely reflects BaTIS capturing ongoing post-colonial media trade and the benefits of trade liberalisation for broader services flows, rather than discrete film production decisions.
+
+The core incentive findings are similar. The destination incentive effect for BaTIS under pair FE is $+27\%$ (compared to $+45\%$ under BaTIS PPML), which is larger than the IMDb film count effect ($+9\%$) and also statistically significant. Crucially, the BaTIS destination effect is stable across Anglo subsamples, providing stronger evidence than IMDb that the destination attraction effect generalises beyond the Anglo production network. The origin pull-back observed in IMDb PPML ($-12\%$) is also present in BaTIS PPML ($-15\%$), though under pair FE the BaTIS origin effect flips to \textit{positive} ($+22\%$) and is statistically significant. This suggests that the introduction of home-country incentives may simultaneously pull film shoots back while deepening broader audiovisual services relationships through expanded post-production and distribution activity.
+
+BaTIS provides mixed evidence on duration effects. In PPML, years active is positive and significant ($+2.2\%$ per year) unlike the null IMDb result. However, under pair FE the coefficient reverses to significantly \textit{negative} ($-2.1\%$ per year), indicating that the PPML duration effect reflected cross-sectional selection rather than genuine within-pair accumulation.
+
+The Model~7 event study is uninformative due to near-perfect multicollinearity among event-time indicators in the balanced panel structure \citep{borusyak2024}.

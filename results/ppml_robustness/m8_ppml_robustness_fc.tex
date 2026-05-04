@@ -1,0 +1,45 @@
+\begin{table}[ht]
+\centering\small
+\caption{Model 8 Robustness: PPML Pair Fixed Effects --- IMDb Film Counts}
+\label{tab:m8_ppml_robustness}
+\begin{tabular}{lccc}
+\hline\hline
+ & Full & Excl A-to-A & Excl Anglo \\
+\hline
+$\ln$ GDP (origin) & $0.0894^{***}$ & $0.0609^{*}$ & $0.0082$ \\
+ & $(0.0336)$ & $(0.0319)$ & $(0.0234)$ \\
+$\ln$ GDP (destination) & $-0.0468$ & $-0.0464$ & $-0.0296$ \\
+ & $(0.0532)$ & $(0.0505)$ & $(0.0452)$ \\
+Remoteness (origin) & $0.4897^{*}$ & $0.4871^{*}$ & $0.8817^{***}$ \\
+ & $(0.2611)$ & $(0.2711)$ & $(0.3259)$ \\
+Remoteness (destination) & $-0.0878$ & $-0.0186$ & $-0.1137$ \\
+ & $(0.3143)$ & $(0.1882)$ & $(0.2209)$ \\
+Econ. freedom (destination) & $-0.0804^{**}$ & $0.0002$ & $-0.0247$ \\
+ & $(0.0382)$ & $(0.0317)$ & $(0.0373)$ \\
+Econ. freedom (origin) & $-0.0637$ & $0.0351$ & $0.1366$ \\
+ & $(0.0732)$ & $(0.0722)$ & $(0.1198)$ \\
+RTA & $0.0277$ & $-0.0580$ & $-0.0463$ \\
+ & $(0.0592)$ & $(0.0417)$ & $(0.0537)$ \\
+Incentive (destination) & $0.1440^{***}$ & $0.1682^{***}$ & $0.1361^{***}$ \\
+ & $(0.0494)$ & $(0.0511)$ & $(0.0415)$ \\
+Incentive (origin) & $-0.1854^{***}$ & $-0.1974^{***}$ & $0.0058$ \\
+ & $(0.0717)$ & $(0.0683)$ & $(0.0463)$ \\
+\hline
+Pair FE & Yes & Yes & Yes \\
+Year FE & Yes & Yes & Yes \\
+Observations & 5,995 & 5,594 & 2,733 \\
+\hline\hline
+\multicolumn{4}{p{0.95\textwidth}}{\footnotesize 
+\textit{Notes:} PPML estimator with country-pair and year fixed effects, 
+implemented via the Correia-Guimar\~aes-Zylkin algorithm \citep{correia2020fast} 
+as a robustness check on the OLS Model 8 estimates reported in Table 8. This 
+specification addresses the \citet{chen2024logs} critique of $\ln(y+1)$ 
+transformations when zeros are common. Pair FE absorbs all time-invariant 
+bilateral controls (distance, contiguity, common language, colonial 
+relationship), which are not separately reported. Pairs with all-zero outcomes 
+are dropped (uninformative under pair FE); further observations are dropped via 
+the FE separation check. Standard errors clustered by country pair in 
+parentheses. Coefficients on incentive dummies are semi-elasticities. 
+$^{***}p<0.01, ^{**}p<0.05, ^{*}p<0.1$.}
+\end{tabular}
+\end{table}

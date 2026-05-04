@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: EC421_Film_Incentives.aux
+Reallocating 'name_of_file' (item size: 1) to 8 items.
+The style file: apalike.bst
+Reallocating 'name_of_file' (item size: 1) to 11 items.
+Database file #1: references.bib
+Warning--there's a number but no volume in conte2022
+Warning--there's a number but no volume in walsh2006
+You've used 30 entries,
+            1935 wiz_defined-function locations,
+            658 strings with 8379 characters,
+and the built_in function-call counts, 10983 in all, are:
+= -- 1121
+> -- 330
+< -- 29
++ -- 120
+- -- 102
+* -- 909
+:= -- 1926
+add.period$ -- 97
+call.type$ -- 30
+change.case$ -- 204
+chr.to.int$ -- 30
+cite$ -- 32
+duplicate$ -- 416
+empty$ -- 812
+format.name$ -- 154
+if$ -- 2131
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 26
+newline$ -- 159
+num.names$ -- 90
+pop$ -- 126
+preamble$ -- 1
+purify$ -- 201
+quote$ -- 0
+skip$ -- 326
+stack$ -- 0
+substring$ -- 886
+swap$ -- 36
+text.length$ -- 3
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 178
+warning$ -- 2
+while$ -- 100
+width$ -- 0
+write$ -- 405
+(There were 2 warnings)

@@ -1,0 +1,197 @@
+% =============================================================================
+% Methodology Section --- Film Production Incentives Gravity Model
+%
+% Slots into main document under a \section{Methodology} header (or similar).
+% This file begins at \subsection{} level.
+%
+% Required packages: amsmath (for align, multline), booktabs, float (for [H])
+%
+% Bibliography keys referenced:
+%   kimura2006, baier2009, conte2022, santos2006,
+%   bertrand2004, cameron2015
+% =============================================================================
+
+% ----------------------------------------------------------------
+\subsection{The Gravity Model Framework}
+\label{sec:gravity_framework}
+% ----------------------------------------------------------------
+
+Following \citet{kimura2006}, the standard gravity equation drawn from theory takes the following form:
+\begin{equation}
+T_{ij} = G_i^{\beta_1} \cdot G_j^{\beta_2} \cdot D_{ij}^{\beta_3} \cdot R_i^{\beta_4} \cdot R_j^{\beta_5} \cdot E_{ij}
+\label{eq:gravity_structural}
+\end{equation}
+where $T_{ij}$ denotes bilateral trade flows between country $i$ and country $j$; $G_i$ and $G_j$ represent the economic mass of each country (proxied by GDP); $D_{ij}$ is the geographical distance between countries $i$ and $j$; $R_i$ and $R_j$ capture the relative distance (remoteness) of each country from the rest of the world; and $E_{ij}$ is a multiplicative error term. Taking logarithms yields the standard log-linear estimating equation.
+
+% ----------------------------------------------------------------
+\subsection{Model Specifications}
+\label{sec:specifications}
+% ----------------------------------------------------------------
+
+Ten models are estimated, building sequentially from a baseline gravity specification through incentive effects and identification strategies. Models~1--7 are estimated by Poisson Pseudo Maximum Likelihood (PPML) while Models~8--10 (which estimate country-pair effects) are estimated by Ordinary Least Squares (OLS). Models~8--10 are estimated by OLS as the computational demands of country-pair fixed effects mean that estimation by PPML is infeasible.
+
+All PPML models include importer, exporter, and year fixed effects throughout. The fixed effects structure uses separate (non-interacted) importer and exporter dummies rather than the country$\times$year approach of \citet{baier2009}, because the incentive variables of interest vary at the country-year level and would be fully absorbed by country$\times$year fixed effects. This trade-off is discussed further in Section~\ref{sec:estimator_choice}.
+
+\subsubsection{Model 1: Baseline Gravity}
+
+The baseline specification includes the core gravity variables with importer, exporter, and year fixed effects. Following the PPML framework, the conditional mean is specified in multiplicative form:
+\begin{equation}
+\mathbb{E}[X_{ijt}] = \exp\left(\beta_1 \ln GDP_{it} + \beta_2 \ln GDP_{jt} + \beta_3 \ln DIST_{ij} + \beta_4 REM_{it} + \beta_5 REM_{jt} + \alpha_i + \alpha_j + \delta_t\right)
+\label{eq:model1}
+\end{equation}
+where $X_{ijt}$ is the level of bilateral flows (trade value, film count, or budget), $GDP_{it}$ and $GDP_{jt}$ are real GDP in constant 2015 US dollars (World Bank), $DIST_{ij}$ is population-weighted bilateral distance from the CEPII Gravity database \citep{conte2022}, and $REM_{it}$ is a remoteness index constructed following \citet{baier2009} as:
+\begin{equation}
+REM_{it} = \ln\left(\frac{1}{\sum_{k \neq i} \left[GDP_{kt} / GDP_{Wt}\right] / DIST_{ik}}\right)
+\label{eq:remoteness}
+\end{equation}
+This index is time-varying because GDP shares evolve, even though distances are fixed. Higher values indicate greater geographic isolation from economically significant partners. The terms $\alpha_i$, $\alpha_j$, and $\delta_t$ denote importer, exporter, and year fixed effects respectively, and are included in all PPML specifications (Models~1--7).
+
+\subsubsection{Model 2: Full Gravity with Cultural and Institutional Controls}
+
+Model~2 augments the baseline with cultural proximity, trade policy, and institutional quality variables inside the exponential:
+\begin{multline}
+\mathbb{E}[X_{ijt}] = \exp\big(\ldots + \beta_6\, CONTIG_{ij} + \beta_7\, COMLANG_{ij} + \beta_8\, COL45_{ij} \\
++ \beta_9\, RTA_{ijt} + \beta_{10}\, EFW_{it} + \beta_{11}\, EFW_{jt}\big)
+\label{eq:model2}
+\end{multline}
+where $CONTIG_{ij}$ indicates a shared land border, $COMLANG_{ij}$ a common official language, $COL45_{ij}$ a post-1945 colonial relationship (all from CEPII), $RTA_{ijt}$ a regional trade agreement in force, and $EFW_{it}$ the Economic Freedom of the World composite index. Common language is expected to be particularly important for audiovisual services, where linguistic accessibility directly affects co-production feasibility and market access. The EFW index is published quinquennially prior to 2000 and annually thereafter.
+
+\subsubsection{Model 3: Incentive Dummies}
+
+Model~3 introduces the primary variables of interest:
+\begin{equation}
+\mathbb{E}[X_{ijt}] = \exp\left(\ldots + \gamma_1\, INCENTIVE_{it}^{exp} + \gamma_2\, INCENTIVE_{jt}^{imp}\right)
+\label{eq:model3}
+\end{equation}
+where $INCENTIVE_{it}^{exp}$ equals one if the exporter (filming location) has an active incentive scheme in year $t$, and $INCENTIVE_{jt}^{imp}$ equals one if the importer (home country) has an active scheme. The coefficient $\gamma_1$ captures whether a filming destination's incentive scheme is associated with higher inward production flows. The coefficient $\gamma_2$ captures whether the introduction of incentives in a production's home country is associated with increased overseas filming via an ``importer incentive'' effect whereby domestic incentive infrastructure lowers the fixed costs of organising international production.
+
+\subsubsection{Model 4: Incentive Type Heterogeneity}
+
+Model~4 disaggregates the exporter incentive by instrument type, following the three-category typology of Olsberg SPI. The Olsberg SPI classification groups film incentive schemes into three categories: cash rebates (direct spend-based payments), tax credits (covering both refundable and non-refundable credit structures), and tax shelters (investor-side tax relief mechanisms). Rebate is retained as the omitted reference category; $TAXCREDIT$ and $TAXSHELTER$ dummies capture the additional effect of each alternative instrument relative to the rebate baseline:
+\begin{equation}
+\mathbb{E}[X_{ijt}] = \exp\left(\ldots + \gamma_1\, INCENTIVE_{it}^{exp} + \gamma_{TC}\, TAXCREDIT_{it} + \gamma_{TS}\, TAXSHELTER_{it} + \gamma_2\, INCENTIVE_{jt}^{imp}\right)
+\label{eq:model4}
+\end{equation}
+Rebate is used as the reference category because it is the modal instrument in the dataset (48 of 57 countries with active schemes), providing the statistically most stable baseline against which the tax credit and tax shelter effects can be estimated. The coefficient $\gamma_1$ therefore identifies the overall effect of an active rebate, while $\gamma_{TC}$ and $\gamma_{TS}$ identify the differential effect of tax credits and tax shelters respectively relative to rebates. A positive $\gamma_{TC}$ would indicate that tax credits attract more production than rebates, controlling for the common effect of having any incentive; a null $\gamma_{TC}$ would indicate that tax credits and rebates are indistinguishable in their effect on production location.
+
+\subsubsection{Model 5: Incentive Generosity}
+
+Model~5 replaces the binary incentive dummies with continuous generosity measures on both sides:
+\begin{equation}
+\mathbb{E}[X_{ijt}] = \exp\left(\ldots + \gamma_1\, GENEROSITY_{it}^{exp} + \gamma_2\, GENEROSITY_{jt}^{imp}\right)
+\label{eq:model5}
+\end{equation}
+where $GENEROSITY_{it}$ is the headline rate of the incentive scheme (as a proportion, e.g., 0.25 for a 25\% credit), set to zero for countries without an active scheme. This tests whether more generous incentives generate proportionally larger effects on both the exporter and importer sides, sourced from the Olsberg SPI Global Incentives Index.
+
+\subsubsection{Models 6 and 7: Cluster Effects}
+
+Models~6 and 7 test whether incentive effects strengthen over time through infrastructure accumulation and industry clustering.
+
+Model~6 augments Model~3 with a continuous duration variable:
+\begin{equation}
+\mathbb{E}[X_{ijt}] = \exp\left(\ldots + \gamma_1\, INCENTIVE_{it}^{exp} + \gamma_A\, YEARS\_ACTIVE_{it} + \gamma_2\, INCENTIVE_{jt}^{imp}\right)
+\label{eq:model6}
+\end{equation}
+where $YEARS\_ACTIVE_{it} = \min(t - T_i^*, 20)$ when the incentive is active ($T_i^*$ being the introduction year), capped at 20 to prevent extreme values. A positive $\gamma_A$ would indicate that each additional year of operation generates further production flows, consistent with learning-by-doing and reputation effects.
+
+Model~7 replaces the aggregate exporter incentive with separate indicators for early and late adopters:
+\begin{equation}
+\mathbb{E}[X_{ijt}] = \exp\left(\ldots + \gamma_E\, EARLY_{it} + \gamma_L\, LATE_{it} + \gamma_2\, INCENTIVE_{jt}^{imp}\right)
+\label{eq:model7}
+\end{equation}
+where $EARLY_{it} = 1$ if country $i$ introduced its incentive before 2005 and it is active in year $t$, and $LATE_{it} = 1$ for post-2005 adopters. If cluster effects matter, early adopters should exhibit a larger coefficient ($\gamma_E > \gamma_L$).
+
+\subsubsection{Model 8: Country-Pair Fixed Effects}
+
+Model~8 provides the most demanding identification test using country-pair fixed effects, estimated via OLS with a within-transformation. The pair fixed effect $\alpha_{ij}$ absorbs all time-invariant bilateral heterogeneity so only time-varying regressors survive:
+\begin{multline}
+\ln X_{ijt} = \beta_1 \ln GDP_{it} + \beta_2 \ln GDP_{jt} + \beta_3\, REM_{it} + \beta_4\, REM_{jt} + \beta_5\, RTA_{ijt} \\
++ \beta_6\, EFW_{it} + \beta_7\, EFW_{jt} + \gamma_1\, INCENTIVE_{it}^{exp} + \gamma_2\, INCENTIVE_{jt}^{imp} + \alpha_{ij} + \delta_t + \varepsilon_{ijt}
+\label{eq:model8}
+\end{multline}
+Estimation proceeds by demeaning all variables by their within-pair means. Singleton pairs (appearing in only one year) are dropped. This specification identifies incentive effects exclusively from within-pair temporal variation: changes in a given pair's flows before versus after incentive introduction.
+
+\subsubsection{Model 9: Event Study}
+
+Model~9 replaces the binary exporter incentive with relative-time dummies to examine dynamic treatment effects and test for pre-existing trends:
+\begin{equation}
+\ln X_{ijt} = \boldsymbol{\beta}' \mathbf{z}_{ijt} + \gamma_2\, INCENTIVE_{jt}^{imp} + \sum_{\substack{\tau = -5 \\ \tau \neq -1}}^{+10} \mu_\tau\, D_{i\tau} + \alpha_{ij} + \delta_t + \varepsilon_{ijt}
+\label{eq:model9}
+\end{equation}
+where $D_{i\tau}$ equals one if the observation falls $\tau$ years relative to the exporter's incentive introduction date, with $\tau = -1$ as the omitted reference. The event window spans $\tau \in [-5, +10]$. The vector $\mathbf{z}_{ijt}$ includes all time-varying controls from Model~8 except the exporter incentive dummy (which is replaced by the event dummies), plus the importer incentive control. Pre-treatment coefficients ($\tau < -1$) test the parallel trends assumption; post-treatment coefficients ($\tau \geq 0$) reveal whether effects materialise immediately, build gradually, or dissipate.
+
+\subsubsection{Model 10: Cluster Effects with Pair Fixed Effects}
+
+Model~10 combines the years-active variable from Model~6 with the pair fixed effects identification from Model~8:
+\begin{equation}
+\ln X_{ijt} = \boldsymbol{\beta}' \mathbf{z}_{ijt} + \gamma_1\, INCENTIVE_{it}^{exp} + \gamma_A\, YEARS\_ACTIVE_{it} + \gamma_2\, INCENTIVE_{jt}^{imp} + \alpha_{ij} + \delta_t + \varepsilon_{ijt}
+\label{eq:model10}
+\end{equation}
+The vector $\mathbf{z}_{ijt}$ includes all time-varying controls from Model~8 including the exporter and importer incentive dummies. This tests whether the within-pair incentive effect grows with duration, providing the strictest identification of cluster dynamics by netting out all time-invariant pair heterogeneity.
+
+% ----------------------------------------------------------------
+\subsection{Estimator Choice and Fixed Effects Structure}
+\label{sec:estimator_choice}
+% ----------------------------------------------------------------
+
+Models~1--7 are estimated by Poisson Pseudo-Maximum Likelihood (PPML), following \citet{santos2006}. PPML models the conditional mean as $\mathbb{E}[X|\mathbf{z}] = \exp(\boldsymbol{\beta}'\mathbf{z})$, estimating directly on the level of the dependent variable. This offers three advantages: it accommodates the count nature of the IMDb dependent variable; it is robust to the heteroskedasticity that invalidates log-linearised OLS; and it naturally handles zero trade flows. Coefficients on log-transformed regressors (GDP, distance) are elasticities; coefficients on dummy variables (incentives, contiguity) are semi-elasticities with percentage effects given by $(\exp(\beta) - 1) \times 100\%$. Model fit is assessed via the McFadden pseudo-$R^2 = 1 - D/D_0$.
+
+All PPML models include separate importer ($\alpha_i$), exporter ($\alpha_j$), and year ($\delta_t$) fixed effects. This controls for all time-invariant country characteristics and common temporal shocks, while allowing time-varying country-level variables (GDP, remoteness, EFW, incentives) to be identified from within-country temporal variation. The theoretically preferred country$\times$year fixed effects of \citet{baier2009} would fully absorb these time-varying unilateral variables, including the incentive dummies that are this paper's primary variables of interest. The separate-FE approach is standard in applied gravity work where the policy variable is unilateral rather than bilateral \citep[e.g.,][]{kimura2006}. Models~8--10 are estimated by OLS with country-pair fixed effects implemented via within-transformation (demeaning by pair means). Year dummies are included.
+
+Throughout all specifications, standard errors are clustered at the country-pair level. In panel trade data, residuals for a given country pair are likely correlated across years: if a pair experiences an unusually productive year for film co-production, the following year is also likely to be above average due to persistent relationship-specific factors such as ongoing co-production agreements. Pair-level clustering produces standard errors that are robust to both heteroskedasticity (unequal error variance across pairs of different sizes) and arbitrary within-pair serial correlation \citep{bertrand2004, cameron2015}. This is more conservative than heteroskedasticity-only robust standard errors, which assume independence across observations and correct only for unequal variance.
+
+% ----------------------------------------------------------------
+\subsection{Robustness and Subsample Analysis}
+\label{sec:robustness}
+% ----------------------------------------------------------------
+
+Each pair fixed effects specification (Models~8, 9, and 10) is estimated on four samples to address potential threats to identification.
+
+\subsubsection{The Anglo-Network Problem}
+
+The English-speaking production network (the United States, United Kingdom, Canada, Australia, and New Zealand) dominates global production flows and may introduce counterintuitive distance coefficients, since these geographically dispersed countries trade intensely due to shared language, institutional similarities, and deep co-production relationships. Models are re-estimated on two restricted samples: (a) excluding Anglo-to-Anglo pairs only, and (b) excluding all pairs involving any Anglo country. Stability of incentive coefficients across these subsamples indicates results are not driven by idiosyncratic features of the Anglo network.
+
+\subsubsection{Sample Without Economic Freedom Controls}
+
+Because the EFW index reduces sample coverage, all pair FE models are re-estimated dropping EFW controls entirely, using the broader merged dataset. This verifies that results are not an artefact of sample selection induced by EFW data availability.
+
+\subsubsection{Income-Adjusted Economic Freedom (EFWRESID)}
+
+Following \citet{kimura2006}, who note the correlation between economic freedom and per capita income, all ten models are additionally estimated replacing the raw EFW index with an income-adjusted variant. The residualised index ($EFWRESID$) is constructed by regressing EFW on the log of GDP in a pooled cross-sectional OLS regression across all country-year observations:
+\begin{align}
+EFW_{it} &= \alpha + \beta \cdot \ln GDP_{it} + \varepsilon_{it} \label{eq:efw_reg} \\
+EFWRESID_{it} &= \hat{\varepsilon}_{it} \label{eq:efwresid}
+\end{align}
+The residual captures the component of economic freedom that is orthogonal to income level---institutional quality beyond what a country's GDP would predict. Separate regressions are run for exporter and importer sides. Stability of incentive coefficients across the raw EFW and EFWRESID specifications confirms that results are not confounded by the EFW--income correlation.
+
+\subsubsection{Dual Dependent Variables (IMDb)}
+
+For the IMDb dataset, all specifications are estimated with two dependent variables: the bilateral film count (extensive margin) and the aggregate bilateral budget in constant 2010 USD (intensive margin). Consistency across these two measures strengthens the interpretation that incentives affect the real volume of production rather than merely the number of low-budget projects.
+
+\subsubsection{Cross-Dataset Validation}
+
+The parallel estimation across IMDb (film-level microdata, 1990--2023) and BaTIS (official services trade statistics, 2005--2023) provides independent validation. The two datasets have different units, coverage, and measurement error structures, so convergent results provide stronger evidence than either alone.
+
+% ---- Summary Table of Model Specifications ----
+\begin{table}[H]
+\centering
+\caption{Summary of Model Specifications}
+\label{tab:model_summary}
+\small
+\begin{tabular}{@{}llllll@{}}
+\toprule
+& Description & Est. & Fixed Effects & Dep Var & Identifying Variation \\
+\midrule
+M1 & Baseline gravity & PPML & Imp, Exp, Year & Levels & Cross-sect.\ + temporal \\
+M2 & Full gravity (+ cultural, RTA, EFW) & PPML & Imp, Exp, Year & Levels & Cross-sect.\ + temporal \\
+M3 & Incentive dummies & PPML & Imp, Exp, Year & Levels & Cross-sect.\ + temporal \\
+M4 & Incentive type dummies & PPML & Imp, Exp, Year & Levels & Cross-sect.\ + temporal \\
+M5 & Generosity (exp + imp) & PPML & Imp, Exp, Year & Levels & Cross-sect.\ + temporal \\
+M6 & Cluster: years active & PPML & Imp, Exp, Year & Levels & Cross-sect.\ + temporal \\
+M7 & Cluster: early vs late & PPML & Imp, Exp, Year & Levels & Cross-sect.\ + temporal \\
+M8 & Incentive dummies & OLS & Pair, Year & Log & Within-pair temporal \\
+M9 & Event study & OLS & Pair, Year & Log & Within-pair, rel.\ time \\
+M10 & Cluster: years active & OLS & Pair, Year & Log & Within-pair temporal \\
+\bottomrule
+\end{tabular}
+\end{table}
